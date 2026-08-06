@@ -4,7 +4,7 @@
 
 ### 1.1 Propósito
 
-Descreva o objetivo deste documento e do sistema a ser desenvolvido.
+O objetivo deste documento é realizar o levantamento de requisitos referentes ao sistema do Connect.
 
 ### 1.2 Escopo
 
