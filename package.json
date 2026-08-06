@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "lint:check": "prettier --check .",
+    "lint:fix": "prettier write .",
     "build": "next build",
     "start": "next start"
   },
@@ -14,6 +16,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "prettier": "^3.9.6",
     "tailwindcss": "^4"
   }
 }
