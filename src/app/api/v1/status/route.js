@@ -10,8 +10,11 @@ export async function GET() {
   const databaseVersionValue = postgresVersionResult.rows[0].server_version;
   const maxConnectionValue = maxConnectionsResult.rows[0].max_connections;
 
+  const updated_at = new Date().toISOString();
+
   return NextResponse.json({
     status: 200,
+    updated_at: updated_at,
     dependencies: {
       database: {
         status: dataBaseStateResult.rows[2].state,
