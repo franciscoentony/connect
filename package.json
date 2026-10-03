@@ -7,6 +7,11 @@
     "services:up": "docker compose -f infra/compose.yaml up -d",
     "services:stop": "docker compose -f infra/compose.yaml stop",
     "services:down": "docker compose -f infra/compose.yaml down",
+
+    "migrations:create": "node-pg-migrate create -m infra/migrations",
+    "migrations:up": "node-pg-migrate up -m infra/migrations",
+    "migrations:down": "node-pg-migrate down -m infra/migrations",
+
     "lint:check": "prettier --check .",
     "lint:fix": "prettier --write .",
     "test": "jest",
@@ -22,6 +27,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "dotenv": "^18.0.5",
     "jest": "^30.4.2",
     "node-pg-migrate": "^9.0.0",
     "prettier": "^3.9.6",
