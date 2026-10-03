@@ -35,7 +35,7 @@ export const up = (pgm) => {
     );
     CREATE INDEX idx_doacao_id_doador ON doacao (id_doador);
     CREATE INDEX idx_doacao_id_campanha ON doacao (id_campanha);
-  `)
+  `);
 };
 
 /**

@@ -29,7 +29,7 @@ export const up = (pgm) => {
       cidade      VARCHAR(100) NOT NULL
     );
     CREATE INDEX idx_local_entrega_id_campanha ON local_entrega (id_campanha);
-  `)
+  `);
 };
 
 /**

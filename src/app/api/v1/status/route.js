@@ -1,6 +1,27 @@
+/**
+ * @swagger
+ * /api/v1/status:
+ *   get:
+ *     summary: Verifica o status do servidor
+ *     description: Retorna o estado atual da aplicação e do banco de dados.
+ *     responses:
+ *       200:
+ *         description: O servidor está online e saudável.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "fully_operational"
+ *                 uptime:
+ *                   type: number
+ *                   example: 1243.5
+ */
+
 import { NextResponse } from "next/server";
 import { query } from "infra/database.js";
-
 export async function GET() {
   const [postgresVersionResult, dataBaseStateResult, maxConnectionsResult] =
     await query(
