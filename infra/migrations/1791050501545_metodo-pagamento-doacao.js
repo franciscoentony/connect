@@ -28,6 +28,8 @@ export const up = (pgm) => {
       valor       NUMERIC(12,2),
       data        TIMESTAMPTZ NOT NULL DEFAULT now(),
       status      status_doacao NOT NULL DEFAULT 'pendente',
+      -- Se for doação em dinheiro, valor e método são obrigatórios.
+      -- (Lê-se: "ou não é dinheiro, ou tem valor e método".)
       CONSTRAINT doacao_dinheiro_exige_valor_e_metodo CHECK (
         tipo <> 'dinheiro'
         OR (valor IS NOT NULL AND valor > 0 AND id_metodo IS NOT NULL)
