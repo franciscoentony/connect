@@ -87,7 +87,7 @@ export async function obterCampanhaVisivel(id, sessao) {
   return campanha;
 }
 
-async function obterCampanhadaOng(id, idOng) {
+export async function obterCampanhaDaOng(id, idOng) {
   const campanha = await buscarCampanha(id);
   if (!campanha) throw new ErroDeNegocio("campanha não encontrada", 404);
   if (campanha.id_ong !== idOng) throw new ErroDeNegocio("sem permissão", 403);
@@ -111,7 +111,7 @@ export async function criarCampanha(idOng, dados) {
 }
 
 export async function atualizarCampanha(id, idOng, dados) {
-  const atual = await obterCampanhadaOng(id, idOng);
+  const atual = await obterCampanhaDaOng(id, idOng);
 
   if(TRANSICOES[atual.status].length === 0) {
     throw new ErroDeNegocio(`campanha ${atual.status} não pode ser alterada`, 409);
@@ -164,7 +164,7 @@ export async function listarLocais(idCampanha) {
 
 export async function criarLocal(idCampanha, idOng, dados) {
   const { endereco, cidade } = validarLocal(dados);
-  const campanha = await obterCampanhadaOng(idCampanha, idOng);
+  const campanha = await obterCampanhaDaOng(idCampanha, idOng);
   if (["encerrada", "cancelada"].includes(campanha.status)) {
     throw new ErroDeNegocio(`campanha ${campanha.status} não aceita novos locais`, 409);
   }

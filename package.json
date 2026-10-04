@@ -2,6 +2,7 @@
   "name": "connect",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "npm run services:up && next dev",
     "services:up": "docker compose -f infra/compose.yaml up -d",
@@ -12,8 +13,8 @@
     "migrations:down": "node-pg-migrate down -m infra/migrations",
     "lint:check": "prettier --check .",
     "lint:fix": "prettier --write .",
-    "test": "jest",
-    "test:watch": "jest --watch",
+    "test": "NODE_OPTIONS=\"--experimental-vm-modules --import dotenv/config\" jest",
+    "test:watch": "NODE_OPTIONS=\"--experimental-vm-modules --import dotenv/config\" jest --watch",
     "build": "next build",
     "start": "next start"
   },
