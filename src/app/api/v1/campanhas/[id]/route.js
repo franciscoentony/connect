@@ -18,7 +18,11 @@ export async function PATCH(request, { params }) {
   try {
     const id = lerId((await params).id);
     const sessao = await exigirUsuario("ong");
-    const campanha = await atualizarCampanha(id, sessao.id_usuario, await lerJson(request));
+    const campanha = await atualizarCampanha(
+      id,
+      sessao.id_usuario,
+      await lerJson(request),
+    );
     return NextResponse.json(campanha);
   } catch (error) {
     return responderErro(error);

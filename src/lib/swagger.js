@@ -1,43 +1,43 @@
-import { createSwaggerSpec } from 'next-swagger-doc';
+import { createSwaggerSpec } from "next-swagger-doc";
 
 export const getApiDocs = async () => {
   const spec = createSwaggerSpec({
     definition: {
-      openapi: '3.0.0',
+      openapi: "3.0.0",
       info: {
-        title: 'Documentação API Connect',
-        version: '1.0.0',
+        title: "Documentação API Connect",
+        version: "1.0.0",
       },
       paths: {
-        '/api/v1/usuarios': {
+        "/api/v1/usuarios": {
           get: {
-            summary: 'Retorna lista de usuários no banco de dados',
+            summary: "Retorna lista de usuários no banco de dados",
             responses: {
               200: {
-                description: 'Sucesso',
+                description: "Sucesso",
               },
             },
           },
           post: {
-            summary: 'Envia os dados e cria o usuário e retorna um 201',
+            summary: "Envia os dados e cria o usuário e retorna um 201",
             requestBody: {
               required: true,
               content: {
-                'application/json': {
+                "application/json": {
                   schema: {
-                    type: 'object',
+                    type: "object",
                     properties: {
                       email: {
-                        type: 'string',
-                        example: 'joao@email.com',
+                        type: "string",
+                        example: "joao@email.com",
                       },
                       senhaHash: {
-                        type: 'string',
-                        example: 'senha123',
+                        type: "string",
+                        example: "senha123",
                       },
                       tipo: {
-                        type: 'string',
-                        example: 'doador',
+                        type: "string",
+                        example: "doador",
                       },
                     },
                   },
@@ -46,20 +46,20 @@ export const getApiDocs = async () => {
             },
             responses: {
               201: {
-                description: 'Criado com sucesso',
+                description: "Criado com sucesso",
               },
             },
           },
         },
-        '/api/v1/status': {
+        "/api/v1/status": {
           get: {
-            summary: 'Retorna todos os status do servidor',
+            summary: "Retorna todos os status do servidor",
             responses: {
               200: {
-                description: "sucess"
-              }
-            }
-          }
+                description: "sucess",
+              },
+            },
+          },
         },
       },
     },

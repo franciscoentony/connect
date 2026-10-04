@@ -1,4 +1,4 @@
-import { ErroDeNegocio } from '@/lib/erros'
+import { ErroDeNegocio } from "@/lib/erros";
 
 export async function lerJson(request) {
   try {
@@ -18,7 +18,10 @@ export function lerId(valor) {
 
 export function lerPaginacao(request) {
   const params = request.nextUrl.searchParams;
-  const limite = Math.min(Math.max(parseInt(params.get("limite")) || 20, 1), 50);
+  const limite = Math.min(
+    Math.max(parseInt(params.get("limite")) || 20, 1),
+    50,
+  );
   const pagina = Math.max(parseInt(params.get("pagina")) || 1, 1);
   return { limite, pagina };
 }

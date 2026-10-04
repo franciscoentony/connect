@@ -31,10 +31,18 @@ beforeAll(async () => {
 afterAll(limparDadosDeTeste);
 
 const doar = (cookie, idCampanha, corpo) =>
-  api(`/api/v1/campanhas/${idCampanha}/doacoes`, { metodo: "POST", cookie, corpo });
+  api(`/api/v1/campanhas/${idCampanha}/doacoes`, {
+    metodo: "POST",
+    cookie,
+    corpo,
+  });
 
 const mudarStatus = (cookie, idDoacao, status) =>
-  api(`/api/v1/doacoes/${idDoacao}`, { metodo: "PATCH", cookie, corpo: { status } });
+  api(`/api/v1/doacoes/${idDoacao}`, {
+    metodo: "PATCH",
+    cookie,
+    corpo: { status },
+  });
 
 const arrecadado = async (idCampanha) => {
   const r = await api(`/api/v1/campanhas/${idCampanha}`);
@@ -47,7 +55,10 @@ describe("GET /api/v1/metodos-pagamento", () => {
 
     expect(r.status).toBe(200);
     expect(r.corpo[0]).toEqual(
-      expect.objectContaining({ id_metodo: expect.anything(), nome: expect.any(String) }),
+      expect.objectContaining({
+        id_metodo: expect.anything(),
+        nome: expect.any(String),
+      }),
     );
   });
 });
@@ -63,8 +74,12 @@ describe("quem pode doar, e para quê", () => {
   const dinheiro = () => ({ tipo: "dinheiro", valor: 20, id_metodo: metodoId });
 
   test("sem login retorna 401 e ONG retorna 403", async () => {
-    expect((await doar(undefined, ativa.id_campanha, dinheiro())).status).toBe(401);
-    expect((await doar(ong.cookie, ativa.id_campanha, dinheiro())).status).toBe(403);
+    expect((await doar(undefined, ativa.id_campanha, dinheiro())).status).toBe(
+      401,
+    );
+    expect((await doar(ong.cookie, ativa.id_campanha, dinheiro())).status).toBe(
+      403,
+    );
   });
 
   test("campanha em rascunho não recebe doações (409)", async () => {
@@ -80,7 +95,9 @@ describe("quem pode doar, e para quê", () => {
   });
 
   test("campanha encerrada deixa de receber doações (409)", async () => {
-    const encerrada = await criarCampanhaAtiva(ong.cookie, { titulo: "Vai encerrar" });
+    const encerrada = await criarCampanhaAtiva(ong.cookie, {
+      titulo: "Vai encerrar",
+    });
     await mudarStatusCampanha(ong.cookie, encerrada.id_campanha, "encerrada");
 
     const r = await doar(doador.cookie, encerrada.id_campanha, dinheiro());
@@ -112,11 +129,20 @@ describe("doação em dinheiro", () => {
 
   test.each([
     ["sem método de pagamento", { tipo: "dinheiro", valor: 10 }],
-    ["com método que não existe", { tipo: "dinheiro", valor: 10, id_metodo: 999999999 }],
-    ["com mais de 2 casas decimais", { tipo: "dinheiro", valor: 10.555, id_metodo: 1 }],
+    [
+      "com método que não existe",
+      { tipo: "dinheiro", valor: 10, id_metodo: 999999999 },
+    ],
+    [
+      "com mais de 2 casas decimais",
+      { tipo: "dinheiro", valor: 10.555, id_metodo: 1 },
+    ],
     ["com valor zero", { tipo: "dinheiro", valor: 0, id_metodo: 1 }],
     ["com valor negativo", { tipo: "dinheiro", valor: -5, id_metodo: 1 }],
-    ["com valor que não é número", { tipo: "dinheiro", valor: "abc", id_metodo: 1 }],
+    [
+      "com valor que não é número",
+      { tipo: "dinheiro", valor: "abc", id_metodo: 1 },
+    ],
     ["com tipo inválido", { tipo: "cripto", valor: 10, id_metodo: 1 }],
   ])("rejeita doação %s com 400", async (_descricao, corpo) => {
     const r = await doar(doador.cookie, campanha.id_campanha, corpo);
@@ -169,17 +195,27 @@ describe("confirmação, cancelamento e total arrecadado", () => {
   test("só doações confirmadas, em dinheiro, entram no total arrecadado", async () => {
     expect(await arrecadado(campanha.id_campanha)).toBe(0);
 
-    const pendente = await criar({ tipo: "dinheiro", valor: 50, id_metodo: metodoId });
+    const pendente = await criar({
+      tipo: "dinheiro",
+      valor: 50,
+      id_metodo: metodoId,
+    });
     expect(await arrecadado(campanha.id_campanha)).toBe(0); // pendente não conta
 
-    expect((await mudarStatus(ong.cookie, pendente.id_doacao, "confirmada")).status).toBe(200);
+    expect(
+      (await mudarStatus(ong.cookie, pendente.id_doacao, "confirmada")).status,
+    ).toBe(200);
     expect(await arrecadado(campanha.id_campanha)).toBe(50);
 
     const item = await criar({ tipo: "item", descricao: "Cobertores" });
     await mudarStatus(ong.cookie, item.id_doacao, "confirmada");
     expect(await arrecadado(campanha.id_campanha)).toBe(50); // item não soma
 
-    const cancelada = await criar({ tipo: "dinheiro", valor: 30, id_metodo: metodoId });
+    const cancelada = await criar({
+      tipo: "dinheiro",
+      valor: 30,
+      id_metodo: metodoId,
+    });
     await mudarStatus(doador.cookie, cancelada.id_doacao, "cancelada");
     expect(await arrecadado(campanha.id_campanha)).toBe(50); // cancelada não soma
   });
@@ -202,11 +238,19 @@ describe("confirmação, cancelamento e total arrecadado", () => {
 
   test("uma doação já resolvida não muda mais (409)", async () => {
     const d = await criar({ tipo: "item", descricao: "Livros" });
-    expect((await mudarStatus(ong.cookie, d.id_doacao, "confirmada")).status).toBe(200);
+    expect(
+      (await mudarStatus(ong.cookie, d.id_doacao, "confirmada")).status,
+    ).toBe(200);
 
-    expect((await mudarStatus(ong.cookie, d.id_doacao, "confirmada")).status).toBe(409);
-    expect((await mudarStatus(ong.cookie, d.id_doacao, "cancelada")).status).toBe(409);
-    expect((await mudarStatus(doador.cookie, d.id_doacao, "cancelada")).status).toBe(409);
+    expect(
+      (await mudarStatus(ong.cookie, d.id_doacao, "confirmada")).status,
+    ).toBe(409);
+    expect(
+      (await mudarStatus(ong.cookie, d.id_doacao, "cancelada")).status,
+    ).toBe(409);
+    expect(
+      (await mudarStatus(doador.cookie, d.id_doacao, "cancelada")).status,
+    ).toBe(409);
   });
 
   test("status que não pode ser pedido retorna 400", async () => {
@@ -224,10 +268,16 @@ describe("privacidade das doações", () => {
   beforeAll(async () => {
     campanha = await criarCampanhaAtiva(ong.cookie, { titulo: "Privacidade" });
     doacaoDoDoador = (
-      await doar(doador.cookie, campanha.id_campanha, { tipo: "item", descricao: "Item A" })
+      await doar(doador.cookie, campanha.id_campanha, {
+        tipo: "item",
+        descricao: "Item A",
+      })
     ).corpo;
     doacaoDoOutro = (
-      await doar(outroDoador.cookie, campanha.id_campanha, { tipo: "item", descricao: "Item B" })
+      await doar(outroDoador.cookie, campanha.id_campanha, {
+        tipo: "item",
+        descricao: "Item B",
+      })
     ).corpo;
   });
 
@@ -242,7 +292,9 @@ describe("privacidade das doações", () => {
   });
 
   test("ONG não usa a rota de 'minhas doações' (403)", async () => {
-    expect((await api("/api/v1/doacoes", { cookie: ong.cookie })).status).toBe(403);
+    expect((await api("/api/v1/doacoes", { cookie: ong.cookie })).status).toBe(
+      403,
+    );
   });
 
   test("a doação só é visível ao doador dono e à ONG dona", async () => {
@@ -261,7 +313,10 @@ describe("privacidade das doações", () => {
     const dona = await api(url, { cookie: ong.cookie });
     expect(dona.status).toBe(200);
     expect(dona.corpo.map((d) => d.id_doacao)).toEqual(
-      expect.arrayContaining([doacaoDoDoador.id_doacao, doacaoDoOutro.id_doacao]),
+      expect.arrayContaining([
+        doacaoDoDoador.id_doacao,
+        doacaoDoOutro.id_doacao,
+      ]),
     );
 
     expect((await api(url, { cookie: outraOng.cookie })).status).toBe(403);

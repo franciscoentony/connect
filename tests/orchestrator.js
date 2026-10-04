@@ -37,7 +37,8 @@ export async function api(
       ...(temCorpo && { "Content-Type": "application/json" }),
       ...(cookie && { Cookie: cookie }),
     },
-    body: corpoBruto ?? (corpo !== undefined ? JSON.stringify(corpo) : undefined),
+    body:
+      corpoBruto ?? (corpo !== undefined ? JSON.stringify(corpo) : undefined),
   });
 
   const texto = await resposta.text();
@@ -55,7 +56,9 @@ export async function api(
 async function cadastrar(corpo) {
   const r = await api("/api/v1/usuarios", { metodo: "POST", corpo });
   if (r.status !== 201) {
-    throw new Error(`falha ao cadastrar: ${r.status} ${JSON.stringify(r.corpo)}`);
+    throw new Error(
+      `falha ao cadastrar: ${r.status} ${JSON.stringify(r.corpo)}`,
+    );
   }
   return r.corpo;
 }
@@ -102,7 +105,9 @@ export async function criarCampanha(cookie, dados = {}) {
     corpo: { titulo: "Campanha de teste", meta: 1000, ...dados },
   });
   if (r.status !== 201) {
-    throw new Error(`falha ao criar campanha: ${r.status} ${JSON.stringify(r.corpo)}`);
+    throw new Error(
+      `falha ao criar campanha: ${r.status} ${JSON.stringify(r.corpo)}`,
+    );
   }
   return r.corpo;
 }
@@ -114,7 +119,9 @@ export async function mudarStatusCampanha(cookie, id, status) {
     corpo: { status },
   });
   if (r.status !== 200) {
-    throw new Error(`falha ao mudar status: ${r.status} ${JSON.stringify(r.corpo)}`);
+    throw new Error(
+      `falha ao mudar status: ${r.status} ${JSON.stringify(r.corpo)}`,
+    );
   }
   return r.corpo;
 }
@@ -131,7 +138,9 @@ export async function criarDonatario(cookie, dados = {}) {
     corpo: { nome: "Família de Teste", contato: "(84) 99999-0000", ...dados },
   });
   if (r.status !== 201) {
-    throw new Error(`falha ao criar donatário: ${r.status} ${JSON.stringify(r.corpo)}`);
+    throw new Error(
+      `falha ao criar donatário: ${r.status} ${JSON.stringify(r.corpo)}`,
+    );
   }
   return r.corpo;
 }
@@ -142,7 +151,9 @@ export async function criarDonatario(cookie, dados = {}) {
 // na ordem que as chaves estrangeiras exigem.
 export async function limparDadosDeTeste() {
   if (!process.env.DATABASE_URL) {
-    throw new Error("DATABASE_URL não está definida; não é possível limpar os dados de teste.");
+    throw new Error(
+      "DATABASE_URL não está definida; não é possível limpar os dados de teste.",
+    );
   }
   const client = new Client({ connectionString: process.env.DATABASE_URL });
   await client.connect();

@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
-import { criarUsuario} from '@/models/usuarios.js';
-import { ErroDeNegocio, responderErro } from '@/lib/erros.js';
-import { query } from 'infra/database.js';
-import { lerJson } from '@/lib/requisicao.js'
+import { NextResponse } from "next/server";
+import { criarUsuario } from "@/models/usuarios.js";
+import { ErroDeNegocio, responderErro } from "@/lib/erros.js";
+import { query } from "infra/database.js";
+import { lerJson } from "@/lib/requisicao.js";
 
 export async function POST(request) {
   try {
@@ -18,6 +18,6 @@ export async function GET() {
   const result = await query(`SELECT * FROM usuario`);
 
   return NextResponse.json({
-    usuarios: result.rows
+    usuarios: result.rows,
   });
 }

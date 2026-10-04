@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 export class ErroDeNegocio extends Error {
   constructor(mensagem, status = 400) {

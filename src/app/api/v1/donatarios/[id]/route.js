@@ -22,7 +22,11 @@ export async function PATCH(request, { params }) {
   try {
     const id = lerId((await params).id);
     const sessao = await exigirUsuario("ong");
-    const donatario = await atualizarDonatario(id, sessao.id_usuario, await lerJson(request));
+    const donatario = await atualizarDonatario(
+      id,
+      sessao.id_usuario,
+      await lerJson(request),
+    );
     return NextResponse.json(donatario);
   } catch (error) {
     return responderErro(error);

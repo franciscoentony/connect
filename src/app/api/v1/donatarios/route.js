@@ -7,7 +7,9 @@ import { lerJson, lerPaginacao } from "@/lib/requisicao.js";
 export async function GET(request) {
   try {
     const sessao = await exigirUsuario("ong");
-    return NextResponse.json(await listarDonatarios(sessao.id_usuario, lerPaginacao(request)));
+    return NextResponse.json(
+      await listarDonatarios(sessao.id_usuario, lerPaginacao(request)),
+    );
   } catch (error) {
     return responderErro(error);
   }
@@ -16,7 +18,10 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const sessao = await exigirUsuario("ong");
-    const donatario = await criarDonatario(sessao.id_usuario, await lerJson(request));
+    const donatario = await criarDonatario(
+      sessao.id_usuario,
+      await lerJson(request),
+    );
     return NextResponse.json(donatario, { status: 201 });
   } catch (error) {
     return responderErro(error);

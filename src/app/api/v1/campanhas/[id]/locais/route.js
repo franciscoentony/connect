@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { obterCampanhaVisivel, listarLocais, criarLocal } from "@/models/campanha.js";
+import {
+  obterCampanhaVisivel,
+  listarLocais,
+  criarLocal,
+} from "@/models/campanha.js";
 import { exigirUsuario, lerSessao } from "@/lib/sessao.js";
 import { responderErro } from "@/lib/erros.js";
 import { lerJson, lerId } from "@/lib/requisicao.js";
@@ -18,7 +22,11 @@ export async function POST(request, { params }) {
   try {
     const id = lerId((await params).id);
     const sessao = await exigirUsuario("ong");
-    const local = await criarLocal(id, sessao.id_usuario, await lerJson(request));
+    const local = await criarLocal(
+      id,
+      sessao.id_usuario,
+      await lerJson(request),
+    );
     return NextResponse.json(local, { status: 201 });
   } catch (error) {
     return responderErro(error);

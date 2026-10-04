@@ -1,5 +1,5 @@
-import { query } from 'infra/database.js';
-import { ErroDeNegocio } from '@/lib/erros.js';
+import { query } from "infra/database.js";
+import { ErroDeNegocio } from "@/lib/erros.js";
 
 const TRANSICOES = {
   rascunho: ["ativa", "cancelada"],
@@ -56,7 +56,7 @@ function validarLocal(dados) {
 export async function buscarCampanha(id) {
   const result = await query({
     text: `${SELECT_CAMPANHA} WHERE c.id_campanha = $1`,
-    values: [id]
+    values: [id],
   });
   return result.rows[0] ?? null;
 }
@@ -79,7 +79,8 @@ export async function listarCampanhas({ idOng, limite, pagina }) {
 // Rascunho e cancelada só aparecem para a ONG dona; para os outros é 404.
 export async function obterCampanhaVisivel(id, sessao) {
   const campanha = await buscarCampanha(id);
-  const oculta = campanha && ["rascunho", "cancelada"].includes(campanha.status);
+  const oculta =
+    campanha && ["rascunho", "cancelada"].includes(campanha.status);
   const dona = campanha && sessao?.id_usuario === campanha.id_ong;
   if (!campanha || (oculta && !dona)) {
     throw new ErroDeNegocio("campanha não encontrada", 404);
@@ -113,8 +114,11 @@ export async function criarCampanha(idOng, dados) {
 export async function atualizarCampanha(id, idOng, dados) {
   const atual = await obterCampanhaDaOng(id, idOng);
 
-  if(TRANSICOES[atual.status].length === 0) {
-    throw new ErroDeNegocio(`campanha ${atual.status} não pode ser alterada`, 409);
+  if (TRANSICOES[atual.status].length === 0) {
+    throw new ErroDeNegocio(
+      `campanha ${atual.status} não pode ser alterada`,
+      409,
+    );
   }
 
   const sets = [];
@@ -130,10 +134,10 @@ export async function atualizarCampanha(id, idOng, dados) {
     if (!TRANSICOES[atual.status].includes(dados.status)) {
       throw new ErroDeNegocio(
         `não é possível passar de '${atual.status}' para '${dados.status}'`,
-        409
+        409,
       );
     }
-    add("status", dados.status)
+    add("status", dados.status);
   }
   if (sets.length === 0) throw new ErroDeNegocio("Nenhum campo para atualizar");
 
@@ -166,7 +170,10 @@ export async function criarLocal(idCampanha, idOng, dados) {
   const { endereco, cidade } = validarLocal(dados);
   const campanha = await obterCampanhaDaOng(idCampanha, idOng);
   if (["encerrada", "cancelada"].includes(campanha.status)) {
-    throw new ErroDeNegocio(`campanha ${campanha.status} não aceita novos locais`, 409);
+    throw new ErroDeNegocio(
+      `campanha ${campanha.status} não aceita novos locais`,
+      409,
+    );
   }
   const result = await query({
     text: `INSERT INTO local_entrega (id_campanha, endereco, cidade)

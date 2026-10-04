@@ -70,7 +70,8 @@ export async function atualizarDonatario(id, idOng, dados) {
   };
 
   if (dados?.nome !== undefined) add("nome", validarNome(dados.nome));
-  if (dados?.contato !== undefined) add("contato", validarContato(dados.contato));
+  if (dados?.contato !== undefined)
+    add("contato", validarContato(dados.contato));
   if (sets.length === 0) throw new ErroDeNegocio("nenhum campo para atualizar");
 
   values.push(id, idOng);
@@ -100,13 +101,20 @@ export async function removerDonatario(id, idOng) {
   });
   if (result.rowCount === 0) {
     await obterDonatarioDaOng(id, idOng); // lança 404 se não existir/não for dele
-    throw new ErroDeNegocio("donatário vinculado a campanhas; desvincule antes", 409);
+    throw new ErroDeNegocio(
+      "donatário vinculado a campanhas; desvincule antes",
+      409,
+    );
   }
 }
 
 // ---------- vínculo campanha <-> donatário ----------
 
-export async function listarDonatariosDaCampanha(idCampanha, idOng, { limite, pagina }) {
+export async function listarDonatariosDaCampanha(
+  idCampanha,
+  idOng,
+  { limite, pagina },
+) {
   await obterCampanhaDaOng(idCampanha, idOng);
   const result = await query({
     text: `SELECT d.id_donatario, d.nome, d.contato, d.criado_em
@@ -152,7 +160,10 @@ export async function vincularDonatario(idCampanha, idOng, dados) {
     // diagnostica o motivo para devolver o erro certo
     const campanha = await obterCampanhaDaOng(idCampanha, idOng); // 404 ou 403
     if (["encerrada", "cancelada"].includes(campanha.status)) {
-      throw new ErroDeNegocio(`campanha ${campanha.status} não aceita novos vínculos`, 409);
+      throw new ErroDeNegocio(
+        `campanha ${campanha.status} não aceita novos vínculos`,
+        409,
+      );
     }
     throw new ErroDeNegocio("donatário não encontrado", 404);
   }
@@ -162,7 +173,10 @@ export async function vincularDonatario(idCampanha, idOng, dados) {
 export async function desvincularDonatario(idCampanha, idDonatario, idOng) {
   const campanha = await obterCampanhaDaOng(idCampanha, idOng);
   if (["encerrada", "cancelada"].includes(campanha.status)) {
-    throw new ErroDeNegocio(`campanha ${campanha.status} não pode ser alterada`, 409);
+    throw new ErroDeNegocio(
+      `campanha ${campanha.status} não pode ser alterada`,
+      409,
+    );
   }
   const result = await query({
     text: `DELETE FROM campanha_donatario

@@ -7,7 +7,10 @@ import { lerJson } from "@/lib/requisicao.js";
 export async function GET(request) {
   try {
     const params = request.nextUrl.searchParams;
-    const limite = Math.min(Math.max(parseInt(params.get("limite")) || 20, 1), 50);
+    const limite = Math.min(
+      Math.max(parseInt(params.get("limite")) || 20, 1),
+      50,
+    );
     const pagina = Math.max(parseInt(params.get("pagina")) || 1, 1);
 
     let idOng = null;
@@ -23,7 +26,10 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const sessao = await exigirUsuario("ong");
-    const campanha = await criarCampanha(sessao.id_usuario, await lerJson(request));
+    const campanha = await criarCampanha(
+      sessao.id_usuario,
+      await lerJson(request),
+    );
     return NextResponse.json(campanha, { status: 201 });
   } catch (error) {
     return responderErro(error);

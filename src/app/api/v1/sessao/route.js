@@ -19,7 +19,7 @@ export async function POST(request) {
 export async function GET() {
   try {
     const sessao = await exigirUsuario();
-    const usuario = await buscarUsuarioPorId(sessao.id_usuario)
+    const usuario = await buscarUsuarioPorId(sessao.id_usuario);
     if (!usuario) throw new ErroDeNegocio("não autenticado", 401);
     return NextResponse.json(usuario);
   } catch (error) {
@@ -38,4 +38,3 @@ export async function DELETE() {
 // const sessao = await exigirUsuario("ong"); // 401 se não logado, 403 se não for ONG
 
 // ========= sessao.id_usuario já é o id_ong, porque ong.id_usuario é a chave primária =========
-

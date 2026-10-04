@@ -1,6 +1,6 @@
-import { SignJWT, jwtVerify } from 'jose';
-import { cookies } from 'next/headers';
-import { ErroDeNegocio } from '@/lib/erros.js';
+import { SignJWT, jwtVerify } from "jose";
+import { cookies } from "next/headers";
+import { ErroDeNegocio } from "@/lib/erros.js";
 
 const NOME_COOKIE = "sessao";
 const DURACAO_SEGUNDOS = 60 * 60 * 24 * 7; // 7 Dias
@@ -21,14 +21,14 @@ export async function iniciarSessao(usuario) {
     .setExpirationTime(`${DURACAO_SEGUNDOS}s`)
     .sign(chave());
 
-    const jar = await cookies();
-    jar.set(NOME_COOKIE, token, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: DURACAO_SEGUNDOS,
-    });
+  const jar = await cookies();
+  jar.set(NOME_COOKIE, token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: DURACAO_SEGUNDOS,
+  });
 }
 
 export async function encerrarSessao() {
@@ -39,7 +39,7 @@ export async function encerrarSessao() {
 export async function lerSessao() {
   const jar = await cookies();
   const token = jar.get(NOME_COOKIE)?.value;
-  if(!token) return null;
+  if (!token) return null;
 
   const k = chave();
   try {
@@ -54,6 +54,7 @@ export async function lerSessao() {
 export async function exigirUsuario(tipo) {
   const sessao = await lerSessao();
   if (!sessao) throw new ErroDeNegocio("não autenticado", 401);
-  if (tipo && sessao.tipo !== tipo) throw new ErroDeNegocio("sem permissão", 403);
+  if (tipo && sessao.tipo !== tipo)
+    throw new ErroDeNegocio("sem permissão", 403);
   return sessao;
 }

@@ -8,7 +8,11 @@ export async function POST(request, { params }) {
   try {
     const id = lerId((await params).id);
     const sessao = await exigirUsuario("doador");
-    const doacao = await criarDoacao(sessao.id_usuario, id, await lerJson(request));
+    const doacao = await criarDoacao(
+      sessao.id_usuario,
+      id,
+      await lerJson(request),
+    );
     return NextResponse.json(doacao, { status: 201 });
   } catch (error) {
     return responderErro(error);
@@ -19,7 +23,11 @@ export async function GET(request, { params }) {
   try {
     const id = lerId((await params).id);
     const sessao = await exigirUsuario("ong");
-    const doacoes = await listarDoacoesDaCampanha(id, sessao.id_usuario, lerPaginacao(request));
+    const doacoes = await listarDoacoesDaCampanha(
+      id,
+      sessao.id_usuario,
+      lerPaginacao(request),
+    );
     return NextResponse.json(doacoes);
   } catch (error) {
     return responderErro(error);

@@ -28,18 +28,24 @@ function validar(dados) {
     const valor = String(dados?.valor ?? "");
     // rejeita mais de 2 casas decimais em vez de arredondar sem avisar
     if (!/^\d{1,10}(\.\d{1,2})?$/.test(valor) || Number(valor) <= 0) {
-      throw new ErroDeNegocio("valor deve ser positivo, com até 2 casas decimais");
+      throw new ErroDeNegocio(
+        "valor deve ser positivo, com até 2 casas decimais",
+      );
     }
     const idMetodo = String(dados?.id_metodo ?? "");
     if (!/^\d{1,18}$/.test(idMetodo)) {
-      throw new ErroDeNegocio("id_metodo é obrigatório para doação em dinheiro");
+      throw new ErroDeNegocio(
+        "id_metodo é obrigatório para doação em dinheiro",
+      );
     }
     return { tipo, valor, idMetodo, descricao: null };
   }
 
   const descricao = String(dados?.descricao ?? "").trim();
   if (descricao.length < 3 || descricao.length > 255) {
-    throw new ErroDeNegocio("descrição do item deve ter entre 3 e 255 caracteres");
+    throw new ErroDeNegocio(
+      "descrição do item deve ter entre 3 e 255 caracteres",
+    );
   }
   return { tipo, valor: null, idMetodo: null, descricao };
 }
@@ -66,7 +72,8 @@ export async function obterDoacaoVisivel(id, sessao) {
   const doacao = await buscarDoacao(id);
   const visivel =
     doacao &&
-    (sessao.id_usuario === doacao.id_doador || sessao.id_usuario === doacao.id_ong);
+    (sessao.id_usuario === doacao.id_doador ||
+      sessao.id_usuario === doacao.id_ong);
   if (!visivel) throw new ErroDeNegocio("doação não encontrada", 404);
   return doacao;
 }
@@ -82,7 +89,11 @@ export async function listarDoacoesDoDoador(idDoador, { limite, pagina }) {
   return result.rows;
 }
 
-export async function listarDoacoesDaCampanha(idCampanha, idOng, { limite, pagina }) {
+export async function listarDoacoesDaCampanha(
+  idCampanha,
+  idOng,
+  { limite, pagina },
+) {
   const campanha = await buscarCampanha(idCampanha);
   if (!campanha) throw new ErroDeNegocio("campanha não encontrada", 404);
   if (campanha.id_ong !== idOng) throw new ErroDeNegocio("sem permissão", 403);
@@ -118,7 +129,10 @@ export async function criarDoacao(idDoador, idCampanha, dados) {
       values: [idDoador, idCampanha, idMetodo, tipo, valor, descricao],
     });
   } catch (error) {
-    if (error.code === "23503" && error.constraint === "doacao_id_metodo_fkey") {
+    if (
+      error.code === "23503" &&
+      error.constraint === "doacao_id_metodo_fkey"
+    ) {
       throw new ErroDeNegocio("método de pagamento inválido");
     }
     throw error;
@@ -144,7 +158,10 @@ export async function atualizarStatus(id, sessao, novoStatus) {
     throw new ErroDeNegocio("sem permissão para este status", 403);
   }
   if (doacao.status !== "pendente") {
-    throw new ErroDeNegocio(`doação ${doacao.status} não pode ser alterada`, 409);
+    throw new ErroDeNegocio(
+      `doação ${doacao.status} não pode ser alterada`,
+      409,
+    );
   }
 
   const result = await query({

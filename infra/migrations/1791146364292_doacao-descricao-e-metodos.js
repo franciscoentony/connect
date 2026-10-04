@@ -22,7 +22,6 @@ export const up = (pgm) => {
       ('Cartão de crédito', 'cartao'),
       ('Boleto', 'boleto');
   `);
-
 };
 
 /**

@@ -8,7 +8,11 @@ export async function DELETE(_request, { params }) {
   try {
     const { id, idDonatario } = await params;
     const sessao = await exigirUsuario("ong");
-    await desvincularDonatario(lerId(id), lerId(idDonatario), sessao.id_usuario);
+    await desvincularDonatario(
+      lerId(id),
+      lerId(idDonatario),
+      sessao.id_usuario,
+    );
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     return responderErro(error);
