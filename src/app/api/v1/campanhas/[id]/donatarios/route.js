@@ -7,29 +7,35 @@ import { exigirUsuario } from "@/lib/sessao.js";
 import { responderErro } from "@/lib/erros.js";
 import { lerJson, lerId, lerPaginacao } from "@/lib/requisicao.js";
 
+// donatários vinculados à campanha
 export async function GET(request, { params }) {
   try {
-    const id = lerId((await params).id);
+    const { id } = await params;
+    const idCampanha = lerId(id);
     const sessao = await exigirUsuario("ong");
-    const lista = await listarDonatariosDaCampanha(
-      id,
+    const paginacao = lerPaginacao(request);
+    const donatarios = await listarDonatariosDaCampanha(
+      idCampanha,
       sessao.id_usuario,
-      lerPaginacao(request),
+      paginacao,
     );
-    return NextResponse.json(lista);
+    return NextResponse.json(donatarios);
   } catch (error) {
     return responderErro(error);
   }
 }
 
+// vincula: { "id_donatario": 5 }
 export async function POST(request, { params }) {
   try {
-    const id = lerId((await params).id);
+    const { id } = await params;
+    const idCampanha = lerId(id);
     const sessao = await exigirUsuario("ong");
+    const dados = await lerJson(request);
     const donatario = await vincularDonatario(
-      id,
+      idCampanha,
       sessao.id_usuario,
-      await lerJson(request),
+      dados,
     );
     return NextResponse.json(donatario, { status: 201 });
   } catch (error) {

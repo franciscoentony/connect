@@ -10,9 +10,11 @@ import { lerJson, lerId } from "@/lib/requisicao.js";
 
 export async function GET(_request, { params }) {
   try {
-    const id = lerId((await params).id);
+    const { id } = await params;
+    const idDonatario = lerId(id);
     const sessao = await exigirUsuario("ong");
-    return NextResponse.json(await obterDonatarioDaOng(id, sessao.id_usuario));
+    const donatario = await obterDonatarioDaOng(idDonatario, sessao.id_usuario);
+    return NextResponse.json(donatario);
   } catch (error) {
     return responderErro(error);
   }
@@ -20,12 +22,14 @@ export async function GET(_request, { params }) {
 
 export async function PATCH(request, { params }) {
   try {
-    const id = lerId((await params).id);
+    const { id } = await params;
+    const idDonatario = lerId(id);
     const sessao = await exigirUsuario("ong");
+    const dados = await lerJson(request);
     const donatario = await atualizarDonatario(
-      id,
+      idDonatario,
       sessao.id_usuario,
-      await lerJson(request),
+      dados,
     );
     return NextResponse.json(donatario);
   } catch (error) {
@@ -35,9 +39,10 @@ export async function PATCH(request, { params }) {
 
 export async function DELETE(_request, { params }) {
   try {
-    const id = lerId((await params).id);
+    const { id } = await params;
+    const idDonatario = lerId(id);
     const sessao = await exigirUsuario("ong");
-    await removerDonatario(id, sessao.id_usuario);
+    await removerDonatario(idDonatario, sessao.id_usuario);
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     return responderErro(error);
