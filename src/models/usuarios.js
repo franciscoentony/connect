@@ -4,6 +4,34 @@ import { responderErro, ErroDeNegocio } from '@/lib/erros.js';
 
 const TIPOS = ["ong", "doador"];
 
+const HASH_FALSO = bcrypt.hashSync("senha-falsa-para-igualar-tempo", 12);
+
+export async function autenticar({ email, senha }) {
+  const emailNorm = String(email ?? "").trim().toLowerCase();
+  const senhaStr = String(senha ?? "");
+
+  const result = await query({
+    text: "SELECT id_usuario, email, tipo, senha_hash FROM usuario WHERE email = $1",
+    values: [emailNorm],
+  });
+  const usuario = result.rows[0];
+
+  const ok = await bcrypt.compare(senhaStr, usuario?.senha_hash ?? HASH_FALSO);
+  if (!usuario || !ok) {
+    throw new ErroDeNegocio("e-mail ou senha incorretos", 401);
+  }
+
+  return { id_usuario: usuario.id_usuario, email: usuario.email, tipo: usuario.tipo };
+}
+
+export async function buscarUsuarioPorId(id) {
+  const result = await query({
+    text: "SELECT id_usuario, email, tipo, criado_em FROM usuario WHERE id_usuario = $1",
+    values: [id],
+  });
+  return result.rows[0] ?? null;
+}
+
 function validar(dados) {
   const tipo = dados?.tipo;
   const email = String(dados?.email ?? "").trim().toLowerCase();
