@@ -1,14 +1,3 @@
-/**
- * @swagger
- * /api/v1/usuarios:
- *   get:
- *     summary: Listagem de usuários
- *     description: Listagem de usuarios do banco de dados
- *     responses:
- *       200:
- *         description: Listando usuarios.
- */
-
 import { NextResponse } from 'next/server';
 import { criarUsuario, ErroDeNegocio} from '@/models/usuarios';
 import { query } from 'infra/database';
