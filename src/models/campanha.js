@@ -1,26 +1,40 @@
 import { query } from "infra/database.js";
 import { ErroDeNegocio } from "@/lib/erros.js";
 
-const TRANSICOES = {
+// Para qual status cada status pode mudar.
+// Ex.: uma campanha "rascunho" pode virar "ativa" ou "cancelada".
+// "encerrada" e "cancelada" são finais: não mudam mais.
+const PROXIMOS_STATUS = {
   rascunho: ["ativa", "cancelada"],
   ativa: ["encerrada", "cancelada"],
   encerrada: [],
   cancelada: [],
 };
 
+export function campanhaFinalizada(campanha) {
+  return campanha.status === "encerrada" || campanha.status === "cancelada";
+}
+
+// SELECT usado por todas as buscas de campanha.
+// Além das colunas da campanha, traz:
+// - o nome da ONG (JOIN com a tabela ong);
+// - "arrecadado": a soma das doações em dinheiro já confirmadas.
+//   O COALESCE troca o resultado por 0 quando ainda não há doações
+//   (sem ele, a soma de nenhuma linha seria NULL).
 const SELECT_CAMPANHA = `
-  SELECT c.id_campanha, c.id_ong, o.nome AS ong_nome, c.titulo, c.meta,
-         c.status, c.criado_em,
+  SELECT campanha.id_campanha, campanha.id_ong, ong.nome AS ong_nome,
+         campanha.titulo, campanha.meta, campanha.status, campanha.criado_em,
          COALESCE((
-           SELECT SUM(d.valor) FROM doacao d
-           WHERE d.id_campanha = c.id_campanha
-             AND d.status = 'confirmada' AND d.tipo = 'dinheiro'
+           SELECT SUM(doacao.valor) FROM doacao
+           WHERE doacao.id_campanha = campanha.id_campanha
+             AND doacao.status = 'confirmada'
+             AND doacao.tipo = 'dinheiro'
          ), 0) AS arrecadado
-  FROM campanha c
-  JOIN ong o ON o.id_usuario = c.id_ong
+  FROM campanha
+  JOIN ong ON ong.id_usuario = campanha.id_ong
 `;
 
-// ========== VALIDAÇÃO ==========
+// ---------- validação ----------
 
 function validarTitulo(valor) {
   const titulo = String(valor ?? "").trim();
@@ -30,13 +44,18 @@ function validarTitulo(valor) {
   return titulo;
 }
 
+// A meta é opcional: vazia vira null (campanha sem meta).
 function validarMeta(valor) {
-  if (valor === null || valor === undefined || valor === "") return null;
+  if (valor === null || valor === undefined || valor === "") {
+    return null;
+  }
   const meta = Number(valor);
+  // Number.isFinite recusa NaN ("abc") e Infinity.
+  // 9999999999.99 é o maior valor que cabe na coluna NUMERIC(12,2).
   if (!Number.isFinite(meta) || meta <= 0 || meta > 9999999999.99) {
     throw new ErroDeNegocio("meta deve ser um número positivo");
   }
-  return meta.toFixed(2);
+  return meta.toFixed(2); // sempre com 2 casas: 1000 vira "1000.00"
 }
 
 function validarLocal(dados) {
@@ -51,147 +70,186 @@ function validarLocal(dados) {
   return { endereco, cidade };
 }
 
-// ========== LEITURA ==========
+// ---------- leitura ----------
 
 export async function buscarCampanha(id) {
-  const result = await query({
-    text: `${SELECT_CAMPANHA} WHERE c.id_campanha = $1`,
-    values: [id],
-  });
-  return result.rows[0] ?? null;
+  const result = await query(
+    `${SELECT_CAMPANHA} WHERE campanha.id_campanha = $1`,
+    [id],
+  );
+  if (result.rows.length === 0) {
+    return null;
+  }
+  return result.rows[0];
 }
 
+// Sem idOng: lista as campanhas ativas (visão pública).
+// Com idOng: lista todas as campanhas daquela ONG, de qualquer status.
 export async function listarCampanhas({ idOng, limite, pagina }) {
-  const filtro = idOng ? "c.id_ong = $1" : "c.status = 'ativa'";
-  const values = idOng ? [idOng] : [];
-  values.push(limite, (pagina - 1) * limite);
+  const pular = (pagina - 1) * limite;
 
-  const result = await query({
-    text: `${SELECT_CAMPANHA}
-          WHERE ${filtro}
-          ORDER BY c.criado_em DESC, c.id_campanha DESC
-          LIMIT $${values.length - 1} OFFSET $${values.length}`,
-    values,
-  });
+  if (idOng) {
+    const result = await query(
+      `${SELECT_CAMPANHA}
+       WHERE campanha.id_ong = $1
+       ORDER BY campanha.criado_em DESC, campanha.id_campanha DESC
+       LIMIT $2 OFFSET $3`,
+      [idOng, limite, pular],
+    );
+    return result.rows;
+  }
+
+  const result = await query(
+    `${SELECT_CAMPANHA}
+     WHERE campanha.status = 'ativa'
+     ORDER BY campanha.criado_em DESC, campanha.id_campanha DESC
+     LIMIT $1 OFFSET $2`,
+    [limite, pular],
+  );
   return result.rows;
 }
 
-// Rascunho e cancelada só aparecem para a ONG dona; para os outros é 404.
+// Busca uma campanha respeitando quem pode vê-la:
+// - ativa e encerrada: qualquer pessoa;
+// - rascunho e cancelada: só a ONG dona. Para os outros, finge que não
+//   existe (404), para não revelar que ela existe.
 export async function obterCampanhaVisivel(id, sessao) {
   const campanha = await buscarCampanha(id);
-  const oculta =
-    campanha && ["rascunho", "cancelada"].includes(campanha.status);
-  const dona = campanha && sessao?.id_usuario === campanha.id_ong;
-  if (!campanha || (oculta && !dona)) {
+  if (!campanha) {
+    throw new ErroDeNegocio("campanha não encontrada", 404);
+  }
+
+  const ehPublica =
+    campanha.status === "ativa" || campanha.status === "encerrada";
+  const ehDaOngLogada = sessao && sessao.id_usuario === campanha.id_ong;
+  if (!ehPublica && !ehDaOngLogada) {
     throw new ErroDeNegocio("campanha não encontrada", 404);
   }
   return campanha;
 }
 
+// Busca uma campanha que a ONG logada quer alterar.
+// 404 se não existe; 403 se existe mas é de outra ONG.
 export async function obterCampanhaDaOng(id, idOng) {
   const campanha = await buscarCampanha(id);
-  if (!campanha) throw new ErroDeNegocio("campanha não encontrada", 404);
-  if (campanha.id_ong !== idOng) throw new ErroDeNegocio("sem permissão", 403);
+  if (!campanha) {
+    throw new ErroDeNegocio("campanha não encontrada", 404);
+  }
+  if (campanha.id_ong !== idOng) {
+    throw new ErroDeNegocio("sem permissão", 403);
+  }
   return campanha;
 }
 
-// ========== ESCRITA ==========
+// ---------- escrita ----------
 
 export async function criarCampanha(idOng, dados) {
   const titulo = validarTitulo(dados?.titulo);
   const meta = validarMeta(dados?.meta);
 
-  // o status nasce sempre como rascunho, o cliente não escolhe
-  const result = await query({
-    text: `INSERT INTO campanha (id_ong, titulo, meta)
-          VALUES ($1, $2, $3)
-          RETURNING id_campanha`,
-    values: [idOng, titulo, meta],
-  });
+  // O status não vem do cliente: o banco usa o padrão, "rascunho".
+  const result = await query(
+    `INSERT INTO campanha (id_ong, titulo, meta)
+     VALUES ($1, $2, $3)
+     RETURNING id_campanha`,
+    [idOng, titulo, meta],
+  );
   return buscarCampanha(result.rows[0].id_campanha);
 }
 
+// Altera título, meta e/ou status. Os campos não enviados continuam iguais.
 export async function atualizarCampanha(id, idOng, dados) {
   const atual = await obterCampanhaDaOng(id, idOng);
 
-  if (TRANSICOES[atual.status].length === 0) {
+  if (campanhaFinalizada(atual)) {
     throw new ErroDeNegocio(
       `campanha ${atual.status} não pode ser alterada`,
       409,
     );
   }
 
-  const sets = [];
-  const values = [];
-  const add = (coluna, valor) => {
-    values.push(valor);
-    sets.push(`${coluna} = $${values.length}`);
-  };
+  const veioTitulo = dados?.titulo !== undefined;
+  const veioMeta = dados?.meta !== undefined;
+  const veioStatus = dados?.status !== undefined;
 
-  if (dados?.titulo !== undefined) add("titulo", validarTitulo(dados.titulo));
-  if (dados?.meta !== undefined) add("meta", validarMeta(dados.meta));
-  if (dados?.status !== undefined) {
-    if (!TRANSICOES[atual.status].includes(dados.status)) {
+  if (!veioTitulo && !veioMeta && !veioStatus) {
+    throw new ErroDeNegocio("Nenhum campo para atualizar");
+  }
+
+  // Começa com os valores atuais e troca só o que foi enviado.
+  let titulo = atual.titulo;
+  let meta = atual.meta;
+  let status = atual.status;
+
+  if (veioTitulo) {
+    titulo = validarTitulo(dados.titulo);
+  }
+  if (veioMeta) {
+    meta = validarMeta(dados.meta);
+  }
+  if (veioStatus) {
+    if (!PROXIMOS_STATUS[atual.status].includes(dados.status)) {
       throw new ErroDeNegocio(
         `não é possível passar de '${atual.status}' para '${dados.status}'`,
         409,
       );
     }
-    add("status", dados.status);
+    status = dados.status;
   }
-  if (sets.length === 0) throw new ErroDeNegocio("Nenhum campo para atualizar");
 
-  values.push(id, atual.status);
-  const result = await query({
-    text: `UPDATE campanha SET ${sets.join(", ")}
-          WHERE id_campanha = $${values.length - 1} AND status = $${values.length}
-          RETURNING id_campanha`,
-    values,
-  });
-  // o "AND status" protege contra duas requisições mudando o status ao mesmo tempo
+  // O "AND status = $5" só atualiza se o status ainda for o que lemos acima.
+  // Se outra requisição mudou o status nesse meio-tempo, nenhuma linha é
+  // atualizada e avisamos o cliente para tentar de novo.
+  const result = await query(
+    `UPDATE campanha SET titulo = $1, meta = $2, status = $3
+     WHERE id_campanha = $4 AND status = $5`,
+    [titulo, meta, status, id, atual.status],
+  );
   if (result.rowCount === 0) {
     throw new ErroDeNegocio("a campanha foi alterada, tente novamente", 409);
   }
   return buscarCampanha(id);
 }
 
-// ========== LOCAIS DE ENTREGA ==========
+// ---------- locais de entrega ----------
 
 export async function listarLocais(idCampanha) {
-  const result = await query({
-    text: `SELECT id_local, endereco, cidade
-          FROM local_entrega WHERE id_campanha = $1 ORDER BY id_local`,
-    values: [idCampanha],
-  });
+  const result = await query(
+    `SELECT id_local, endereco, cidade FROM local_entrega
+     WHERE id_campanha = $1
+     ORDER BY id_local`,
+    [idCampanha],
+  );
   return result.rows;
 }
 
 export async function criarLocal(idCampanha, idOng, dados) {
   const { endereco, cidade } = validarLocal(dados);
+
   const campanha = await obterCampanhaDaOng(idCampanha, idOng);
-  if (["encerrada", "cancelada"].includes(campanha.status)) {
+  if (campanhaFinalizada(campanha)) {
     throw new ErroDeNegocio(
       `campanha ${campanha.status} não aceita novos locais`,
       409,
     );
   }
-  const result = await query({
-    text: `INSERT INTO local_entrega (id_campanha, endereco, cidade)
-           VALUES ($1, $2, $3)
-           RETURNING id_local, endereco, cidade`,
-    values: [idCampanha, endereco, cidade],
-  });
+
+  const result = await query(
+    `INSERT INTO local_entrega (id_campanha, endereco, cidade)
+     VALUES ($1, $2, $3)
+     RETURNING id_local, endereco, cidade`,
+    [idCampanha, endereco, cidade],
+  );
   return result.rows[0];
 }
 
 export async function removerLocal(idCampanha, idLocal, idOng) {
   await obterCampanhaDaOng(idCampanha, idOng);
-  const result = await query({
-    text: `DELETE FROM local_entrega
-           WHERE id_local = $1 AND id_campanha = $2
-           RETURNING id_local`,
-    values: [idLocal, idCampanha],
-  });
+
+  const result = await query(
+    "DELETE FROM local_entrega WHERE id_local = $1 AND id_campanha = $2",
+    [idLocal, idCampanha],
+  );
   if (result.rowCount === 0) {
     throw new ErroDeNegocio("local não encontrado", 404);
   }

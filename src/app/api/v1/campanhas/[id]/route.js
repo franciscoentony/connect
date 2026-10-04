@@ -6,8 +6,10 @@ import { lerJson, lerId } from "@/lib/requisicao.js";
 
 export async function GET(_request, { params }) {
   try {
-    const id = lerId((await params).id);
-    const campanha = await obterCampanhaVisivel(id, await lerSessao());
+    const { id } = await params;
+    const idCampanha = lerId(id);
+    const sessao = await lerSessao(); // pode ser null: a rota é pública
+    const campanha = await obterCampanhaVisivel(idCampanha, sessao);
     return NextResponse.json(campanha);
   } catch (error) {
     return responderErro(error);
@@ -16,12 +18,14 @@ export async function GET(_request, { params }) {
 
 export async function PATCH(request, { params }) {
   try {
-    const id = lerId((await params).id);
+    const { id } = await params;
+    const idCampanha = lerId(id);
     const sessao = await exigirUsuario("ong");
+    const dados = await lerJson(request);
     const campanha = await atualizarCampanha(
-      id,
+      idCampanha,
       sessao.id_usuario,
-      await lerJson(request),
+      dados,
     );
     return NextResponse.json(campanha);
   } catch (error) {

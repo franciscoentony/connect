@@ -2,22 +2,22 @@ import { NextResponse } from "next/server";
 import { listarCampanhas, criarCampanha } from "@/models/campanha.js";
 import { exigirUsuario } from "@/lib/sessao.js";
 import { responderErro } from "@/lib/erros.js";
-import { lerJson } from "@/lib/requisicao.js";
+import { lerJson, lerPaginacao } from "@/lib/requisicao.js";
 
+// GET /campanhas            -> campanhas ativas (público)
+// GET /campanhas?minhas=true -> todas as campanhas da ONG logada
 export async function GET(request) {
   try {
-    const params = request.nextUrl.searchParams;
-    const limite = Math.min(
-      Math.max(parseInt(params.get("limite")) || 20, 1),
-      50,
-    );
-    const pagina = Math.max(parseInt(params.get("pagina")) || 1, 1);
+    const { limite, pagina } = lerPaginacao(request);
 
     let idOng = null;
-    if (params.get("minhas") === "true") {
-      idOng = (await exigirUsuario("ong")).id_usuario;
+    if (request.nextUrl.searchParams.get("minhas") === "true") {
+      const sessao = await exigirUsuario("ong");
+      idOng = sessao.id_usuario;
     }
-    return NextResponse.json(await listarCampanhas({ idOng, limite, pagina }));
+
+    const campanhas = await listarCampanhas({ idOng, limite, pagina });
+    return NextResponse.json(campanhas);
   } catch (error) {
     return responderErro(error);
   }
@@ -26,10 +26,8 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const sessao = await exigirUsuario("ong");
-    const campanha = await criarCampanha(
-      sessao.id_usuario,
-      await lerJson(request),
-    );
+    const dados = await lerJson(request);
+    const campanha = await criarCampanha(sessao.id_usuario, dados);
     return NextResponse.json(campanha, { status: 201 });
   } catch (error) {
     return responderErro(error);

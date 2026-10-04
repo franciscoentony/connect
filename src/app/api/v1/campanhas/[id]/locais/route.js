@@ -10,9 +10,15 @@ import { lerJson, lerId } from "@/lib/requisicao.js";
 
 export async function GET(_request, { params }) {
   try {
-    const id = lerId((await params).id);
-    await obterCampanhaVisivel(id, await lerSessao()); // mesma regra de visibilidade
-    return NextResponse.json(await listarLocais(id));
+    const { id } = await params;
+    const idCampanha = lerId(id);
+
+    // Só lista os locais se a pessoa puder ver a campanha (lança 404 se não puder).
+    const sessao = await lerSessao();
+    await obterCampanhaVisivel(idCampanha, sessao);
+
+    const locais = await listarLocais(idCampanha);
+    return NextResponse.json(locais);
   } catch (error) {
     return responderErro(error);
   }
@@ -20,13 +26,11 @@ export async function GET(_request, { params }) {
 
 export async function POST(request, { params }) {
   try {
-    const id = lerId((await params).id);
+    const { id } = await params;
+    const idCampanha = lerId(id);
     const sessao = await exigirUsuario("ong");
-    const local = await criarLocal(
-      id,
-      sessao.id_usuario,
-      await lerJson(request),
-    );
+    const dados = await lerJson(request);
+    const local = await criarLocal(idCampanha, sessao.id_usuario, dados);
     return NextResponse.json(local, { status: 201 });
   } catch (error) {
     return responderErro(error);
