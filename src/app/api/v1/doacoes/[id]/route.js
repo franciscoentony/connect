@@ -6,20 +6,25 @@ import { lerJson, lerId } from "@/lib/requisicao.js";
 
 export async function GET(_request, { params }) {
   try {
-    const id = lerId((await params).id);
+    const { id } = await params;
+    const idDoacao = lerId(id);
     const sessao = await exigirUsuario();
-    return NextResponse.json(await obterDoacaoVisivel(id, sessao));
+    const doacao = await obterDoacaoVisivel(idDoacao, sessao);
+    return NextResponse.json(doacao);
   } catch (error) {
     return responderErro(error);
   }
 }
 
+// confirmar ou cancelar: { "status": "confirmada" } ou { "status": "cancelada" }
 export async function PATCH(request, { params }) {
   try {
-    const id = lerId((await params).id);
+    const { id } = await params;
+    const idDoacao = lerId(id);
     const sessao = await exigirUsuario();
-    const { status } = await lerJson(request);
-    return NextResponse.json(await atualizarStatus(id, sessao, status));
+    const dados = await lerJson(request);
+    const doacao = await atualizarStatus(idDoacao, sessao, dados.status);
+    return NextResponse.json(doacao);
   } catch (error) {
     return responderErro(error);
   }
