@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { criarUsuario, ErroDeNegocio} from '@/models/usuarios';
+import { criarUsuario} from '@/models/usuarios';
+import { ErroDeNegocio } from '@/lib/erros';
 import { query } from 'infra/database';
 
 export async function POST(request) {

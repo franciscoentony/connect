@@ -1,12 +1,6 @@
 import bcrypt from "bcryptjs";
 import { query } from "infra/database.js";
-
-export class ErroDeNegocio extends Error {
-  constructor(mensagem, status = 400) {
-    super(mensagem);
-    this.status = status;
-  }
-}
+import { responderErro, ErroDeNegocio } from '@/lib/erros.js';
 
 const TIPOS = ["ong", "doador"];
 
