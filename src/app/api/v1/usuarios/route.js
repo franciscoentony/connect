@@ -6,6 +6,7 @@ import { lerJson } from '@/lib/requisicao.js'
 
 export async function POST(request) {
   try {
+    const body = await lerJson(request);
     const usuario = await criarUsuario(body);
     return NextResponse.json(usuario, { status: 201 });
   } catch (error) {
