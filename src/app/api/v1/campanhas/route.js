@@ -2,21 +2,25 @@ import { NextResponse } from "next/server";
 import { listarCampanhas, criarCampanha } from "@/models/campanha.js";
 import { exigirUsuario } from "@/lib/sessao.js";
 import { responderErro } from "@/lib/erros.js";
-import { lerJson, lerPaginacao } from "@/lib/requisicao.js";
+import { lerJson, lerId, lerPaginacao } from "@/lib/requisicao.js";
 
-// GET /campanhas            -> campanhas ativas (público)
-// GET /campanhas?minhas=true -> todas as campanhas da ONG logada
+// GET /campanhas              -> campanhas ativas de todas as ONGs (público)
+// GET /campanhas?ong=5        -> campanhas ativas da ONG 5 (público)
+// GET /campanhas?minhas=true  -> todas as campanhas da ONG logada, até rascunhos
 export async function GET(request) {
   try {
-    const { limite, pagina } = lerPaginacao(request);
+    const params = request.nextUrl.searchParams;
+    const paginacao = lerPaginacao(request);
 
-    let idOng = null;
-    if (request.nextUrl.searchParams.get("minhas") === "true") {
+    let filtro = {};
+    if (params.get("minhas") === "true") {
       const sessao = await exigirUsuario("ong");
-      idOng = sessao.id_usuario;
+      filtro = { idOng: sessao.id_usuario, todosOsStatus: true };
+    } else if (params.get("ong")) {
+      filtro = { idOng: lerId(params.get("ong")) };
     }
 
-    const campanhas = await listarCampanhas({ idOng, limite, pagina });
+    const campanhas = await listarCampanhas(filtro, paginacao);
     return NextResponse.json(campanhas);
   } catch (error) {
     return responderErro(error);

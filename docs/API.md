@@ -40,6 +40,19 @@ O `cookies.txt` está no `.gitignore`: ele contém o seu token e não deve ir pa
 
 As listagens aceitam `?pagina=1&limite=20`. O limite padrão é 20, e o máximo é 50.
 
+A resposta vem neste formato:
+
+```json
+{
+  "itens": [{ "id_campanha": "1", "titulo": "Natal Solidário" }],
+  "paginacao": { "pagina": 1, "limite": 20, "total": 45, "total_paginas": 3 }
+}
+```
+
+Use `total_paginas` para montar a navegação ("página 1 de 3").
+
+Listas curtas e sem paginação, como `/metodos-pagamento` e `/campanhas/{id}/locais`, continuam devolvendo um array simples.
+
 ## Erros
 
 Todo erro tem o formato:

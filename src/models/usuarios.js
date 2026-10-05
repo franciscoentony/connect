@@ -43,6 +43,7 @@ export async function autenticar(dados) {
   };
 }
 
+// Dados do usuário logado: login (tabela usuario) + perfil (tabela ong ou doador).
 export async function buscarUsuarioPorId(id) {
   const result = await query(
     "SELECT id_usuario, email, tipo, criado_em FROM usuario WHERE id_usuario = $1",
@@ -50,6 +51,61 @@ export async function buscarUsuarioPorId(id) {
   );
   if (result.rows.length === 0) {
     return null;
+  }
+  const usuario = result.rows[0];
+
+  if (usuario.tipo === "ong") {
+    const perfil = await query(
+      "SELECT nome, cnpj FROM ong WHERE id_usuario = $1",
+      [id],
+    );
+    usuario.nome = perfil.rows[0].nome;
+    usuario.cnpj = perfil.rows[0].cnpj;
+  } else {
+    const perfil = await query(
+      "SELECT nome FROM doador WHERE id_usuario = $1",
+      [id],
+    );
+    usuario.nome = perfil.rows[0].nome;
+  }
+
+  return usuario;
+}
+
+// ---------- perfil ----------
+
+// Por enquanto só o nome pode ser alterado.
+// E-mail e CNPJ identificam a conta; mudá-los exige outra verificação.
+export async function atualizarPerfil(sessao, dados) {
+  const nome = validarNome(dados?.nome);
+
+  if (sessao.tipo === "ong") {
+    await query("UPDATE ong SET nome = $1 WHERE id_usuario = $2", [
+      nome,
+      sessao.id_usuario,
+    ]);
+  } else {
+    await query("UPDATE doador SET nome = $1 WHERE id_usuario = $2", [
+      nome,
+      sessao.id_usuario,
+    ]);
+  }
+
+  return buscarUsuarioPorId(sessao.id_usuario);
+}
+
+// Página pública de uma ONG: só dados que qualquer pessoa pode ver.
+// (O CNPJ é público na Receita Federal e ajuda o doador a confiar na ONG.)
+export async function buscarOngPublica(id) {
+  const result = await query(
+    `SELECT ong.id_usuario AS id_ong, ong.nome, ong.cnpj, usuario.criado_em
+     FROM ong
+     JOIN usuario ON usuario.id_usuario = ong.id_usuario
+     WHERE ong.id_usuario = $1`,
+    [id],
+  );
+  if (result.rows.length === 0) {
+    throw new ErroDeNegocio("ONG não encontrada", 404);
   }
   return result.rows[0];
 }
@@ -62,11 +118,18 @@ function normalizarEmail(email) {
     .toLowerCase();
 }
 
+function validarNome(valor) {
+  const nome = String(valor ?? "").trim();
+  if (nome.length < 2 || nome.length > 150) {
+    throw new ErroDeNegocio("nome deve ter entre 2 e 150 caracteres");
+  }
+  return nome;
+}
+
 function validar(dados) {
   const tipo = dados?.tipo;
   const email = normalizarEmail(dados?.email);
   const senha = String(dados?.senha ?? "");
-  const nome = String(dados?.nome ?? "").trim();
 
   if (tipo !== "ong" && tipo !== "doador") {
     throw new ErroDeNegocio("tipo deve ser 'ong' ou 'doador'");
@@ -82,9 +145,7 @@ function validar(dados) {
   if (senha.length < 8 || senha.length > 72) {
     throw new ErroDeNegocio("a senha deve ter entre 8 e 72 caracteres");
   }
-  if (nome.length < 2 || nome.length > 150) {
-    throw new ErroDeNegocio("nome deve ter entre 2 e 150 caracteres");
-  }
+  const nome = validarNome(dados?.nome);
 
   let cnpj = null;
   if (tipo === "ong") {

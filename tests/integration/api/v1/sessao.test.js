@@ -3,14 +3,16 @@ import {
   aguardarServidor,
   limparDadosDeTeste,
   novoDoador,
+  novaOng,
   SENHA,
 } from "../../../orchestrator.js";
 
-let doador;
+let doador, ong;
 
 beforeAll(async () => {
   await aguardarServidor();
   doador = await novoDoador();
+  ong = await novaOng();
 });
 afterAll(limparDadosDeTeste);
 
@@ -72,6 +74,17 @@ describe("GET /api/v1/sessao (quem sou eu)", () => {
     expect(r.status).toBe(200);
     expect(r.corpo.id_usuario).toBe(doador.id);
     expect(r.corpo.tipo).toBe("doador");
+    expect(r.corpo.nome).toBe("Doador de Teste");
+    expect(r.corpo).not.toHaveProperty("senha_hash");
+  });
+
+  test("para ONG, devolve também o nome e o CNPJ", async () => {
+    const r = await api("/api/v1/sessao", { cookie: ong.cookie });
+
+    expect(r.status).toBe(200);
+    expect(r.corpo.tipo).toBe("ong");
+    expect(r.corpo.nome).toBe("ONG de Teste");
+    expect(r.corpo.cnpj).toMatch(/^\d{14}$/);
   });
 
   test("cookie adulterado é rejeitado", async () => {

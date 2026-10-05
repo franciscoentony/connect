@@ -283,12 +283,12 @@ describe("privacidade das doações", () => {
 
   test("'minhas doações' traz só as do doador logado", async () => {
     const r = await api("/api/v1/doacoes?limite=50", { cookie: doador.cookie });
-    const ids = r.corpo.map((d) => d.id_doacao);
+    const ids = r.corpo.itens.map((d) => d.id_doacao);
 
     expect(r.status).toBe(200);
     expect(ids).toContain(doacaoDoDoador.id_doacao);
     expect(ids).not.toContain(doacaoDoOutro.id_doacao);
-    expect(r.corpo.every((d) => d.id_doador === doador.id)).toBe(true);
+    expect(r.corpo.itens.every((d) => d.id_doador === doador.id)).toBe(true);
   });
 
   test("ONG não usa a rota de 'minhas doações' (403)", async () => {
@@ -312,7 +312,7 @@ describe("privacidade das doações", () => {
 
     const dona = await api(url, { cookie: ong.cookie });
     expect(dona.status).toBe(200);
-    expect(dona.corpo.map((d) => d.id_doacao)).toEqual(
+    expect(dona.corpo.itens.map((d) => d.id_doacao)).toEqual(
       expect.arrayContaining([
         doacaoDoDoador.id_doacao,
         doacaoDoOutro.id_doacao,
