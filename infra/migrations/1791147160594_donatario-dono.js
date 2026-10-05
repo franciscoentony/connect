@@ -15,7 +15,6 @@ export const up = (pgm) => {
       ADD COLUMN criado_em TIMESTAMPTZ NOT NULL DEFAULT now();
     CREATE INDEX idx_donatario_id_ong ON donatario (id_ong);
   `);
-
 };
 
 /**

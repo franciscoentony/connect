@@ -13,7 +13,11 @@ let ong, outraOng, doador;
 
 beforeAll(async () => {
   await aguardarServidor();
-  [ong, outraOng, doador] = await Promise.all([novaOng(), novaOng(), novoDoador()]);
+  [ong, outraOng, doador] = await Promise.all([
+    novaOng(),
+    novaOng(),
+    novoDoador(),
+  ]);
 });
 afterAll(limparDadosDeTeste);
 
@@ -105,7 +109,8 @@ describe("visibilidade", () => {
   test("?minhas=true exige ser ONG", async () => {
     expect((await api("/api/v1/campanhas?minhas=true")).status).toBe(401);
     expect(
-      (await api("/api/v1/campanhas?minhas=true", { cookie: doador.cookie })).status,
+      (await api("/api/v1/campanhas?minhas=true", { cookie: doador.cookie }))
+        .status,
     ).toBe(403);
   });
 
@@ -123,7 +128,9 @@ describe("ciclo de vida (PATCH)", () => {
   });
 
   test("rascunho não pode ir direto para encerrada (409)", async () => {
-    const r = await patch(campanha.id_campanha, ong.cookie, { status: "encerrada" });
+    const r = await patch(campanha.id_campanha, ong.cookie, {
+      status: "encerrada",
+    });
 
     expect(r.status).toBe(409);
   });
@@ -151,13 +158,17 @@ describe("ciclo de vida (PATCH)", () => {
   test("status que não existe e PATCH vazio são rejeitados", async () => {
     const id = campanha.id_campanha;
 
-    expect((await patch(id, ong.cookie, { status: "inventado" })).status).toBe(409);
+    expect((await patch(id, ong.cookie, { status: "inventado" })).status).toBe(
+      409,
+    );
     expect((await patch(id, ong.cookie, {})).status).toBe(400);
   });
 
   test("campanha encerrada fica congelada (409)", async () => {
     const id = campanha.id_campanha;
-    expect((await patch(id, ong.cookie, { status: "encerrada" })).status).toBe(200);
+    expect((await patch(id, ong.cookie, { status: "encerrada" })).status).toBe(
+      200,
+    );
 
     const r = await patch(id, ong.cookie, { titulo: "Tarde demais" });
 
@@ -176,12 +187,26 @@ describe("locais de entrega", () => {
   const url = () => `/api/v1/campanhas/${campanha.id_campanha}/locais`;
 
   test("só a ONG dona cria local", async () => {
-    expect((await api(url(), { metodo: "POST", corpo: local })).status).toBe(401);
+    expect((await api(url(), { metodo: "POST", corpo: local })).status).toBe(
+      401,
+    );
     expect(
-      (await api(url(), { metodo: "POST", cookie: doador.cookie, corpo: local })).status,
+      (
+        await api(url(), {
+          metodo: "POST",
+          cookie: doador.cookie,
+          corpo: local,
+        })
+      ).status,
     ).toBe(403);
     expect(
-      (await api(url(), { metodo: "POST", cookie: outraOng.cookie, corpo: local })).status,
+      (
+        await api(url(), {
+          metodo: "POST",
+          cookie: outraOng.cookie,
+          corpo: local,
+        })
+      ).status,
     ).toBe(403);
   });
 
@@ -196,7 +221,11 @@ describe("locais de entrega", () => {
   });
 
   test("cria, lista publicamente e remove um local", async () => {
-    const criado = await api(url(), { metodo: "POST", cookie: ong.cookie, corpo: local });
+    const criado = await api(url(), {
+      metodo: "POST",
+      cookie: ong.cookie,
+      corpo: local,
+    });
     expect(criado.status).toBe(201);
     expect(criado.corpo.cidade).toBe("Natal");
 
@@ -206,7 +235,8 @@ describe("locais de entrega", () => {
 
     const urlLocal = `${url()}/${criado.corpo.id_local}`;
     expect(
-      (await api(urlLocal, { metodo: "DELETE", cookie: outraOng.cookie })).status,
+      (await api(urlLocal, { metodo: "DELETE", cookie: outraOng.cookie }))
+        .status,
     ).toBe(403);
     expect(
       (await api(urlLocal, { metodo: "DELETE", cookie: ong.cookie })).status,
@@ -219,7 +249,11 @@ describe("locais de entrega", () => {
   test("campanha encerrada não aceita novos locais (409)", async () => {
     await mudarStatusCampanha(ong.cookie, campanha.id_campanha, "encerrada");
 
-    const r = await api(url(), { metodo: "POST", cookie: ong.cookie, corpo: local });
+    const r = await api(url(), {
+      metodo: "POST",
+      cookie: ong.cookie,
+      corpo: local,
+    });
 
     expect(r.status).toBe(409);
   });

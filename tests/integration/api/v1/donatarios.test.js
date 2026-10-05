@@ -14,7 +14,11 @@ let ong, outraOng, doador;
 
 beforeAll(async () => {
   await aguardarServidor();
-  [ong, outraOng, doador] = await Promise.all([novaOng(), novaOng(), novoDoador()]);
+  [ong, outraOng, doador] = await Promise.all([
+    novaOng(),
+    novaOng(),
+    novoDoador(),
+  ]);
 });
 afterAll(limparDadosDeTeste);
 
@@ -28,7 +32,9 @@ const vincular = (cookie, idCampanha, idDonatario) =>
 describe("/api/v1/donatarios", () => {
   test("exige login (401) e perfil de ONG (403)", async () => {
     expect((await api("/api/v1/donatarios")).status).toBe(401);
-    expect((await api("/api/v1/donatarios", { cookie: doador.cookie })).status).toBe(403);
+    expect(
+      (await api("/api/v1/donatarios", { cookie: doador.cookie })).status,
+    ).toBe(403);
 
     const post = await api("/api/v1/donatarios", {
       metodo: "POST",
@@ -50,10 +56,18 @@ describe("/api/v1/donatarios", () => {
     });
     expect(invalido.status).toBe(400);
 
-    const minha = await api("/api/v1/donatarios?limite=50", { cookie: ong.cookie });
-    const dela = await api("/api/v1/donatarios?limite=50", { cookie: outraOng.cookie });
-    expect(minha.corpo.map((d) => d.id_donatario)).toContain(criado.id_donatario);
-    expect(dela.corpo.map((d) => d.id_donatario)).not.toContain(criado.id_donatario);
+    const minha = await api("/api/v1/donatarios?limite=50", {
+      cookie: ong.cookie,
+    });
+    const dela = await api("/api/v1/donatarios?limite=50", {
+      cookie: outraOng.cookie,
+    });
+    expect(minha.corpo.map((d) => d.id_donatario)).toContain(
+      criado.id_donatario,
+    );
+    expect(dela.corpo.map((d) => d.id_donatario)).not.toContain(
+      criado.id_donatario,
+    );
   });
 
   test("outra ONG não vê, não edita e não apaga (404, não 403)", async () => {
@@ -62,10 +76,17 @@ describe("/api/v1/donatarios", () => {
 
     expect((await api(url, { cookie: outraOng.cookie })).status).toBe(404);
     expect(
-      (await api(url, { metodo: "PATCH", cookie: outraOng.cookie, corpo: { nome: "Invasor" } }))
-        .status,
+      (
+        await api(url, {
+          metodo: "PATCH",
+          cookie: outraOng.cookie,
+          corpo: { nome: "Invasor" },
+        })
+      ).status,
     ).toBe(404);
-    expect((await api(url, { metodo: "DELETE", cookie: outraOng.cookie })).status).toBe(404);
+    expect(
+      (await api(url, { metodo: "DELETE", cookie: outraOng.cookie })).status,
+    ).toBe(404);
 
     // e o registro continua intacto para a dona
     const intacto = await api(url, { cookie: ong.cookie });
@@ -87,12 +108,18 @@ describe("/api/v1/donatarios", () => {
     expect(editado.corpo.nome).toBe("Nome novo");
     expect(editado.corpo.contato).toBeNull();
 
-    const vazio = await api(url, { metodo: "PATCH", cookie: ong.cookie, corpo: {} });
+    const vazio = await api(url, {
+      metodo: "PATCH",
+      cookie: ong.cookie,
+      corpo: {},
+    });
     expect(vazio.status).toBe(400);
   });
 
   test("id inválido retorna 404", async () => {
-    expect((await api("/api/v1/donatarios/abc", { cookie: ong.cookie })).status).toBe(404);
+    expect(
+      (await api("/api/v1/donatarios/abc", { cookie: ong.cookie })).status,
+    ).toBe(404);
   });
 });
 
@@ -100,29 +127,42 @@ describe("vínculo com campanhas", () => {
   let campanha, donatario;
 
   beforeAll(async () => {
-    campanha = await criarCampanhaAtiva(ong.cookie, { titulo: "Com donatários" });
+    campanha = await criarCampanhaAtiva(ong.cookie, {
+      titulo: "Com donatários",
+    });
     donatario = await criarDonatario(ong.cookie, { nome: "Para vincular" });
   });
 
   test("a ONG dona vincula um donatário seu à campanha dela", async () => {
-    const r = await vincular(ong.cookie, campanha.id_campanha, donatario.id_donatario);
+    const r = await vincular(
+      ong.cookie,
+      campanha.id_campanha,
+      donatario.id_donatario,
+    );
 
     expect(r.status).toBe(201);
     expect(r.corpo.id_donatario).toBe(donatario.id_donatario);
   });
 
   test("vincular de novo o mesmo donatário retorna 409", async () => {
-    const r = await vincular(ong.cookie, campanha.id_campanha, donatario.id_donatario);
+    const r = await vincular(
+      ong.cookie,
+      campanha.id_campanha,
+      donatario.id_donatario,
+    );
 
     expect(r.status).toBe(409);
   });
 
   test("id_donatario ausente ou inválido retorna 400", async () => {
-    const semId = await api(`/api/v1/campanhas/${campanha.id_campanha}/donatarios`, {
-      metodo: "POST",
-      cookie: ong.cookie,
-      corpo: {},
-    });
+    const semId = await api(
+      `/api/v1/campanhas/${campanha.id_campanha}/donatarios`,
+      {
+        metodo: "POST",
+        cookie: ong.cookie,
+        corpo: {},
+      },
+    );
     const invalido = await vincular(ong.cookie, campanha.id_campanha, "abc");
 
     expect(semId.status).toBe(400);
@@ -130,7 +170,9 @@ describe("vínculo com campanhas", () => {
   });
 
   test("não dá para misturar ONGs: nem na campanha alheia, nem com donatário alheio", async () => {
-    const dela = await criarDonatario(outraOng.cookie, { nome: "Da outra ONG" });
+    const dela = await criarDonatario(outraOng.cookie, {
+      nome: "Da outra ONG",
+    });
 
     // outra ONG tentando usar a campanha da primeira
     const naCampanhaAlheia = await vincular(
@@ -160,7 +202,9 @@ describe("vínculo com campanhas", () => {
 
     const dona = await api(url, { cookie: ong.cookie });
     expect(dona.status).toBe(200);
-    expect(dona.corpo.map((d) => d.id_donatario)).toContain(donatario.id_donatario);
+    expect(dona.corpo.map((d) => d.id_donatario)).toContain(
+      donatario.id_donatario,
+    );
 
     expect((await api(url)).status).toBe(401);
     expect((await api(url, { cookie: doador.cookie })).status).toBe(403);
@@ -171,31 +215,50 @@ describe("vínculo com campanhas", () => {
     const urlDonatario = `/api/v1/donatarios/${donatario.id_donatario}`;
     const urlVinculo = `/api/v1/campanhas/${campanha.id_campanha}/donatarios/${donatario.id_donatario}`;
 
-    const bloqueado = await api(urlDonatario, { metodo: "DELETE", cookie: ong.cookie });
+    const bloqueado = await api(urlDonatario, {
+      metodo: "DELETE",
+      cookie: ong.cookie,
+    });
     expect(bloqueado.status).toBe(409);
 
-    expect((await api(urlVinculo, { metodo: "DELETE", cookie: outraOng.cookie })).status).toBe(403);
-    expect((await api(urlVinculo, { metodo: "DELETE", cookie: ong.cookie })).status).toBe(204);
-    expect((await api(urlVinculo, { metodo: "DELETE", cookie: ong.cookie })).status).toBe(404);
+    expect(
+      (await api(urlVinculo, { metodo: "DELETE", cookie: outraOng.cookie }))
+        .status,
+    ).toBe(403);
+    expect(
+      (await api(urlVinculo, { metodo: "DELETE", cookie: ong.cookie })).status,
+    ).toBe(204);
+    expect(
+      (await api(urlVinculo, { metodo: "DELETE", cookie: ong.cookie })).status,
+    ).toBe(404);
 
-    expect((await api(urlDonatario, { metodo: "DELETE", cookie: ong.cookie })).status).toBe(204);
+    expect(
+      (await api(urlDonatario, { metodo: "DELETE", cookie: ong.cookie }))
+        .status,
+    ).toBe(204);
     expect((await api(urlDonatario, { cookie: ong.cookie })).status).toBe(404);
   });
 });
 
 describe("campanha encerrada", () => {
   test("não aceita novos vínculos nem remoção de vínculos (409)", async () => {
-    const campanha = await criarCampanhaAtiva(ong.cookie, { titulo: "Vai encerrar" });
-    const vinculado = await criarDonatario(ong.cookie, { nome: "Já vinculado" });
+    const campanha = await criarCampanhaAtiva(ong.cookie, {
+      titulo: "Vai encerrar",
+    });
+    const vinculado = await criarDonatario(ong.cookie, {
+      nome: "Já vinculado",
+    });
     const novo = await criarDonatario(ong.cookie, { nome: "Chegou tarde" });
     expect(
-      (await vincular(ong.cookie, campanha.id_campanha, vinculado.id_donatario)).status,
+      (await vincular(ong.cookie, campanha.id_campanha, vinculado.id_donatario))
+        .status,
     ).toBe(201);
 
     await mudarStatusCampanha(ong.cookie, campanha.id_campanha, "encerrada");
 
     expect(
-      (await vincular(ong.cookie, campanha.id_campanha, novo.id_donatario)).status,
+      (await vincular(ong.cookie, campanha.id_campanha, novo.id_donatario))
+        .status,
     ).toBe(409);
     const desvincular = await api(
       `/api/v1/campanhas/${campanha.id_campanha}/donatarios/${vinculado.id_donatario}`,
@@ -205,7 +268,9 @@ describe("campanha encerrada", () => {
   });
 
   test("rascunho aceita vínculos normalmente", async () => {
-    const rascunho = await criarCampanha(ong.cookie, { titulo: "Ainda rascunho" });
+    const rascunho = await criarCampanha(ong.cookie, {
+      titulo: "Ainda rascunho",
+    });
     const d = await criarDonatario(ong.cookie);
 
     const r = await vincular(ong.cookie, rascunho.id_campanha, d.id_donatario);

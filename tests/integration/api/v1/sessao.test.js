@@ -38,7 +38,10 @@ describe("POST /api/v1/sessao (login)", () => {
   });
 
   test("senha errada e e-mail inexistente dão exatamente a mesma resposta", async () => {
-    const senhaErrada = await login({ email: doador.email, senha: "senha-errada-123" });
+    const senhaErrada = await login({
+      email: doador.email,
+      senha: "senha-errada-123",
+    });
     const emailInexistente = await login({
       email: "ninguem@teste.connect",
       senha: SENHA,
@@ -79,7 +82,8 @@ describe("GET /api/v1/sessao (quem sou eu)", () => {
 
   test("token com a assinatura alterada é rejeitado", async () => {
     const [nome, token] = doador.cookie.split("=");
-    const adulterado = token.slice(0, -4) + (token.endsWith("AAAA") ? "BBBB" : "AAAA");
+    const adulterado =
+      token.slice(0, -4) + (token.endsWith("AAAA") ? "BBBB" : "AAAA");
 
     const r = await api("/api/v1/sessao", { cookie: `${nome}=${adulterado}` });
 

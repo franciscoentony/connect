@@ -12,6 +12,7 @@ export const up = (pgm) => {
   pgm.sql(`
     ALTER TABLE doacao ADD COLUMN descricao VARCHAR(255);
 
+    -- Se for doação de item, precisa de descrição e não pode ter valor nem método.
     ALTER TABLE doacao ADD CONSTRAINT doacao_item_exige_descricao CHECK (
       tipo <> 'item'
       OR (descricao IS NOT NULL AND valor IS NULL AND id_metodo IS NULL)
@@ -22,7 +23,6 @@ export const up = (pgm) => {
       ('Cartão de crédito', 'cartao'),
       ('Boleto', 'boleto');
   `);
-
 };
 
 /**

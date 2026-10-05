@@ -4,10 +4,13 @@ import { exigirUsuario } from "@/lib/sessao.js";
 import { responderErro } from "@/lib/erros.js";
 import { lerJson, lerPaginacao } from "@/lib/requisicao.js";
 
+// donatários da ONG logada
 export async function GET(request) {
   try {
     const sessao = await exigirUsuario("ong");
-    return NextResponse.json(await listarDonatarios(sessao.id_usuario, lerPaginacao(request)));
+    const paginacao = lerPaginacao(request);
+    const donatarios = await listarDonatarios(sessao.id_usuario, paginacao);
+    return NextResponse.json(donatarios);
   } catch (error) {
     return responderErro(error);
   }
@@ -16,7 +19,8 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const sessao = await exigirUsuario("ong");
-    const donatario = await criarDonatario(sessao.id_usuario, await lerJson(request));
+    const dados = await lerJson(request);
+    const donatario = await criarDonatario(sessao.id_usuario, dados);
     return NextResponse.json(donatario, { status: 201 });
   } catch (error) {
     return responderErro(error);

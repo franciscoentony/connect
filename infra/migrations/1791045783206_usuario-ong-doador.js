@@ -9,6 +9,13 @@ export const shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 export const up = (pgm) => {
+  // Todo usuário tem login (tabela usuario) e um perfil, que pode ser de
+  // ONG ou de doador (tabelas ong e doador). O perfil usa o mesmo id do usuário.
+  //
+  // Por que a coluna "tipo" aparece também em ong e doador?
+  // A chave estrangeira usa o par (id_usuario, tipo). Junto com o CHECK,
+  // isso garante no próprio banco que um usuário do tipo 'doador' nunca
+  // ganhe um perfil de ONG (e vice-versa).
   pgm.sql(`
     CREATE TYPE tipo_usuario AS ENUM ('ong', 'doador');
 
@@ -50,6 +57,6 @@ export const down = (pgm) => {
       DROP TABLE doador;
       DROP TABLE ong;
       DROP TABLE usuario;
-      DROP TABLE tipo_usuario;
+      DROP TYPE tipo_usuario;
     `);
 };
