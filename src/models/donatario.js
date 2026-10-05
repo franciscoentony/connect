@@ -1,6 +1,6 @@
 import { query } from "infra/database.js";
 import { ErroDeNegocio } from "@/lib/erros.js";
-import { ehIdValido } from "@/lib/requisicao.js";
+import { ehIdValido, respostaPaginada } from "@/lib/requisicao.js";
 import { obterCampanhaDaOng, campanhaFinalizada } from "@/models/campanha.js";
 
 // Donatário é quem recebe as doações (ex.: uma família atendida pela ONG).
@@ -47,6 +47,12 @@ export async function criarDonatario(idOng, dados) {
 }
 
 export async function listarDonatarios(idOng, { limite, pagina }) {
+  const contagem = await query(
+    "SELECT COUNT(*) AS total FROM donatario WHERE id_ong = $1",
+    [idOng],
+  );
+  const total = Number(contagem.rows[0].total);
+
   const result = await query(
     `SELECT id_donatario, nome, contato, criado_em FROM donatario
      WHERE id_ong = $1
@@ -54,7 +60,7 @@ export async function listarDonatarios(idOng, { limite, pagina }) {
      LIMIT $2 OFFSET $3`,
     [idOng, limite, (pagina - 1) * limite],
   );
-  return result.rows;
+  return respostaPaginada(result.rows, total, { limite, pagina });
 }
 
 // Busca um donatário da ONG logada.
@@ -130,6 +136,12 @@ export async function listarDonatariosDaCampanha(
 ) {
   await obterCampanhaDaOng(idCampanha, idOng); // 404 ou 403 se não for da ONG
 
+  const contagem = await query(
+    "SELECT COUNT(*) AS total FROM campanha_donatario WHERE id_campanha = $1",
+    [idCampanha],
+  );
+  const total = Number(contagem.rows[0].total);
+
   const result = await query(
     `SELECT donatario.id_donatario, donatario.nome, donatario.contato, donatario.criado_em
      FROM campanha_donatario
@@ -139,7 +151,7 @@ export async function listarDonatariosDaCampanha(
      LIMIT $2 OFFSET $3`,
     [idCampanha, limite, (pagina - 1) * limite],
   );
-  return result.rows;
+  return respostaPaginada(result.rows, total, { limite, pagina });
 }
 
 export async function vincularDonatario(idCampanha, idOng, dados) {

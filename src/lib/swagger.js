@@ -57,6 +57,16 @@ function lista(nomeDoSchema) {
     items: { $ref: `#/components/schemas/${nomeDoSchema}` },
   };
 }
+// Formato das listagens paginadas: { itens: [...], paginacao: {...} }
+function listaPaginada(nomeDoSchema) {
+  return {
+    type: "object",
+    properties: {
+      itens: lista(nomeDoSchema),
+      paginacao: { $ref: "#/components/schemas/Paginacao" },
+    },
+  };
+}
 function objeto(nomeDoSchema) {
   return { $ref: `#/components/schemas/${nomeDoSchema}` };
 }
@@ -111,6 +121,20 @@ const definition = {
         },
       },
 
+      Paginacao: {
+        type: "object",
+        properties: {
+          pagina: { type: "integer", example: 2 },
+          limite: { type: "integer", example: 20 },
+          total: {
+            type: "integer",
+            description: "Total de itens em todas as páginas",
+            example: 45,
+          },
+          total_paginas: { type: "integer", example: 3 },
+        },
+      },
+
       // ---------- usuários ----------
       NovoUsuario: {
         type: "object",
@@ -147,6 +171,31 @@ const definition = {
           id_usuario: { type: "string", example: "1" },
           email: { type: "string", example: "contato@amigos.org" },
           tipo: { type: "string", enum: ["ong", "doador"] },
+          criado_em: { type: "string", format: "date-time" },
+        },
+      },
+      Perfil: {
+        type: "object",
+        description: "Usuário logado com os dados do perfil.",
+        properties: {
+          id_usuario: { type: "string", example: "1" },
+          email: { type: "string", example: "contato@amigos.org" },
+          tipo: { type: "string", enum: ["ong", "doador"] },
+          criado_em: { type: "string", format: "date-time" },
+          nome: { type: "string", example: "Amigos do Bem" },
+          cnpj: {
+            type: "string",
+            description: "Só para ONG",
+            example: "12345678000190",
+          },
+        },
+      },
+      OngPublica: {
+        type: "object",
+        properties: {
+          id_ong: { type: "string", example: "1" },
+          nome: { type: "string", example: "Amigos do Bem" },
+          cnpj: { type: "string", example: "12345678000190" },
           criado_em: { type: "string", format: "date-time" },
         },
       },
@@ -373,7 +422,7 @@ const definition = {
         summary: "Quem sou eu: dados do usuário logado",
         security: PRECISA_LOGIN,
         responses: {
-          200: respostaJson("Usuário logado", objeto("Usuario")),
+          200: respostaJson("Usuário logado", objeto("Perfil")),
           401: ERRO_401,
         },
       },
@@ -384,12 +433,54 @@ const definition = {
       },
     },
 
+    "/api/v1/perfil": {
+      patch: {
+        tags: ["Usuários e sessão"],
+        summary: "Altera o nome do usuário logado",
+        description: "E-mail e CNPJ não podem ser alterados por aqui.",
+        security: PRECISA_LOGIN,
+        requestBody: corpoJson({
+          type: "object",
+          required: ["nome"],
+          properties: {
+            nome: { type: "string", minLength: 2, maxLength: 150 },
+          },
+        }),
+        responses: {
+          200: respostaJson("Perfil alterado", objeto("Perfil")),
+          400: ERRO_400,
+          401: ERRO_401,
+        },
+      },
+    },
+
+    "/api/v1/ongs/{id}": {
+      get: {
+        tags: ["Usuários e sessão"],
+        summary: "Página pública de uma ONG",
+        description:
+          "As campanhas da ONG ficam em GET /api/v1/campanhas?ong={id}.",
+        parameters: [PARAM_ID("Id da ONG")],
+        responses: {
+          200: respostaJson("ONG", objeto("OngPublica")),
+          404: ERRO_404,
+        },
+      },
+    },
+
     // ==================== campanhas ====================
     "/api/v1/campanhas": {
       get: {
         tags: ["Campanhas"],
-        summary: "Lista campanhas ativas, ou as da ONG logada com ?minhas=true",
+        summary:
+          "Lista campanhas ativas; filtre por ONG com ?ong=ID ou veja as suas com ?minhas=true",
         parameters: [
+          {
+            name: "ong",
+            in: "query",
+            description: "Id de uma ONG: só as campanhas ativas dela (público)",
+            schema: { type: "string" },
+          },
           {
             name: "minhas",
             in: "query",
@@ -401,7 +492,7 @@ const definition = {
           PARAM_LIMITE,
         ],
         responses: {
-          200: respostaJson("Lista de campanhas", lista("Campanha")),
+          200: respostaJson("Lista de campanhas", listaPaginada("Campanha")),
           401: ERRO_401,
           403: ERRO_403,
         },
@@ -534,7 +625,7 @@ const definition = {
         security: PRECISA_LOGIN,
         parameters: [PARAM_ID("Id da campanha"), PARAM_PAGINA, PARAM_LIMITE],
         responses: {
-          200: respostaJson("Lista de doações", lista("Doacao")),
+          200: respostaJson("Lista de doações", listaPaginada("Doacao")),
           401: ERRO_401,
           403: ERRO_403,
           404: ERRO_404,
@@ -549,7 +640,7 @@ const definition = {
         security: PRECISA_LOGIN,
         parameters: [PARAM_PAGINA, PARAM_LIMITE],
         responses: {
-          200: respostaJson("Lista de doações", lista("Doacao")),
+          200: respostaJson("Lista de doações", listaPaginada("Doacao")),
           401: ERRO_401,
           403: ERRO_403,
         },
@@ -603,7 +694,7 @@ const definition = {
         security: PRECISA_LOGIN,
         parameters: [PARAM_PAGINA, PARAM_LIMITE],
         responses: {
-          200: respostaJson("Lista de donatários", lista("Donatario")),
+          200: respostaJson("Lista de donatários", listaPaginada("Donatario")),
           401: ERRO_401,
           403: ERRO_403,
         },
@@ -672,7 +763,7 @@ const definition = {
         security: PRECISA_LOGIN,
         parameters: [PARAM_ID("Id da campanha"), PARAM_PAGINA, PARAM_LIMITE],
         responses: {
-          200: respostaJson("Lista de donatários", lista("Donatario")),
+          200: respostaJson("Lista de donatários", listaPaginada("Donatario")),
           401: ERRO_401,
           403: ERRO_403,
           404: ERRO_404,

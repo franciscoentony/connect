@@ -41,3 +41,21 @@ export function lerPaginacao(request) {
 
   return { limite, pagina };
 }
+
+// Monta a resposta das listagens paginadas:
+// {
+//   "itens": [...],
+//   "paginacao": { "pagina": 2, "limite": 20, "total": 45, "total_paginas": 3 }
+// }
+// Com "total" e "total_paginas", o frontend consegue mostrar "página 2 de 3".
+export function respostaPaginada(itens, total, { pagina, limite }) {
+  return {
+    itens,
+    paginacao: {
+      pagina,
+      limite,
+      total,
+      total_paginas: Math.ceil(total / limite),
+    },
+  };
+}

@@ -62,10 +62,10 @@ describe("/api/v1/donatarios", () => {
     const dela = await api("/api/v1/donatarios?limite=50", {
       cookie: outraOng.cookie,
     });
-    expect(minha.corpo.map((d) => d.id_donatario)).toContain(
+    expect(minha.corpo.itens.map((d) => d.id_donatario)).toContain(
       criado.id_donatario,
     );
-    expect(dela.corpo.map((d) => d.id_donatario)).not.toContain(
+    expect(dela.corpo.itens.map((d) => d.id_donatario)).not.toContain(
       criado.id_donatario,
     );
   });
@@ -202,7 +202,7 @@ describe("vínculo com campanhas", () => {
 
     const dona = await api(url, { cookie: ong.cookie });
     expect(dona.status).toBe(200);
-    expect(dona.corpo.map((d) => d.id_donatario)).toContain(
+    expect(dona.corpo.itens.map((d) => d.id_donatario)).toContain(
       donatario.id_donatario,
     );
 

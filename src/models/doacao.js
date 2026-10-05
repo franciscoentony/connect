@@ -1,6 +1,6 @@
 import { query } from "infra/database.js";
 import { ErroDeNegocio } from "@/lib/erros.js";
-import { ehIdValido } from "@/lib/requisicao.js";
+import { ehIdValido, respostaPaginada } from "@/lib/requisicao.js";
 import { buscarCampanha, obterCampanhaDaOng } from "@/models/campanha.js";
 
 // Código de erro do Postgres para "chave estrangeira aponta para algo que
@@ -101,6 +101,12 @@ export async function obterDoacaoVisivel(id, sessao) {
 }
 
 export async function listarDoacoesDoDoador(idDoador, { limite, pagina }) {
+  const contagem = await query(
+    "SELECT COUNT(*) AS total FROM doacao WHERE id_doador = $1",
+    [idDoador],
+  );
+  const total = Number(contagem.rows[0].total);
+
   const result = await query(
     `${SELECT_DOACAO}
      WHERE doacao.id_doador = $1
@@ -108,7 +114,7 @@ export async function listarDoacoesDoDoador(idDoador, { limite, pagina }) {
      LIMIT $2 OFFSET $3`,
     [idDoador, limite, (pagina - 1) * limite],
   );
-  return result.rows;
+  return respostaPaginada(result.rows, total, { limite, pagina });
 }
 
 export async function listarDoacoesDaCampanha(
@@ -118,6 +124,12 @@ export async function listarDoacoesDaCampanha(
 ) {
   await obterCampanhaDaOng(idCampanha, idOng); // 404 ou 403 se não for da ONG
 
+  const contagem = await query(
+    "SELECT COUNT(*) AS total FROM doacao WHERE id_campanha = $1",
+    [idCampanha],
+  );
+  const total = Number(contagem.rows[0].total);
+
   const result = await query(
     `${SELECT_DOACAO}
      WHERE doacao.id_campanha = $1
@@ -125,7 +137,7 @@ export async function listarDoacoesDaCampanha(
      LIMIT $2 OFFSET $3`,
     [idCampanha, limite, (pagina - 1) * limite],
   );
-  return result.rows;
+  return respostaPaginada(result.rows, total, { limite, pagina });
 }
 
 // ---------- escrita ----------

@@ -87,23 +87,23 @@ describe("visibilidade", () => {
 
   test("a listagem pública mostra só campanhas ativas", async () => {
     const r = await api("/api/v1/campanhas?limite=50");
-    const ids = r.corpo.map((c) => c.id_campanha);
+    const ids = r.corpo.itens.map((c) => c.id_campanha);
 
     expect(r.status).toBe(200);
     expect(ids).toContain(ativa.id_campanha);
     expect(ids).not.toContain(rascunho.id_campanha);
-    expect(r.corpo.every((c) => c.status === "ativa")).toBe(true);
+    expect(r.corpo.itens.every((c) => c.status === "ativa")).toBe(true);
   });
 
   test("?minhas=true lista só as da ONG logada, inclusive rascunhos", async () => {
     const r = await api("/api/v1/campanhas?minhas=true&limite=50", {
       cookie: ong.cookie,
     });
-    const ids = r.corpo.map((c) => c.id_campanha);
+    const ids = r.corpo.itens.map((c) => c.id_campanha);
 
     expect(r.status).toBe(200);
     expect(ids).toContain(rascunho.id_campanha);
-    expect(r.corpo.every((c) => c.id_ong === ong.id)).toBe(true);
+    expect(r.corpo.itens.every((c) => c.id_ong === ong.id)).toBe(true);
   });
 
   test("?minhas=true exige ser ONG", async () => {
@@ -117,6 +117,57 @@ describe("visibilidade", () => {
   test("id inválido ou inexistente retorna 404", async () => {
     expect((await api("/api/v1/campanhas/abc")).status).toBe(404);
     expect((await api("/api/v1/campanhas/999999999")).status).toBe(404);
+  });
+});
+
+describe("listagem por ONG e paginação", () => {
+  let ativaDaOng, rascunhoDaOng, ativaDeOutra;
+
+  beforeAll(async () => {
+    ativaDaOng = await criarCampanhaAtiva(ong.cookie, {
+      titulo: "Ativa da ONG",
+    });
+    rascunhoDaOng = await criarCampanha(ong.cookie, {
+      titulo: "Rascunho da ONG",
+    });
+    ativaDeOutra = await criarCampanhaAtiva(outraOng.cookie, {
+      titulo: "Ativa de outra",
+    });
+  });
+
+  test("?ong=ID mostra só as campanhas ativas daquela ONG, sem login", async () => {
+    const r = await api(`/api/v1/campanhas?ong=${ong.id}&limite=50`);
+    const ids = r.corpo.itens.map((c) => c.id_campanha);
+
+    expect(r.status).toBe(200);
+    expect(ids).toContain(ativaDaOng.id_campanha);
+    expect(ids).not.toContain(rascunhoDaOng.id_campanha);
+    expect(ids).not.toContain(ativaDeOutra.id_campanha);
+  });
+
+  test("?ong com id inválido retorna 404", async () => {
+    expect((await api("/api/v1/campanhas?ong=abc")).status).toBe(404);
+  });
+
+  test("a resposta traz o total e o número de páginas", async () => {
+    const todas = await api("/api/v1/campanhas?minhas=true&limite=50", {
+      cookie: ong.cookie,
+    });
+    const total = todas.corpo.paginacao.total;
+    expect(total).toBe(todas.corpo.itens.length);
+
+    const r = await api("/api/v1/campanhas?minhas=true&limite=1&pagina=2", {
+      cookie: ong.cookie,
+    });
+
+    expect(r.status).toBe(200);
+    expect(r.corpo.itens).toHaveLength(1);
+    expect(r.corpo.paginacao).toEqual({
+      pagina: 2,
+      limite: 1,
+      total,
+      total_paginas: total,
+    });
   });
 });
 

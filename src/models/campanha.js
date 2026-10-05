@@ -1,5 +1,6 @@
 import { query } from "infra/database.js";
 import { ErroDeNegocio } from "@/lib/erros.js";
+import { respostaPaginada } from "@/lib/requisicao.js";
 
 // Para qual status cada status pode mudar.
 // Ex.: uma campanha "rascunho" pode virar "ativa" ou "cancelada".
@@ -83,30 +84,50 @@ export async function buscarCampanha(id) {
   return result.rows[0];
 }
 
-// Sem idOng: lista as campanhas ativas (visão pública).
-// Com idOng: lista todas as campanhas daquela ONG, de qualquer status.
-export async function listarCampanhas({ idOng, limite, pagina }) {
-  const pular = (pagina - 1) * limite;
-
-  if (idOng) {
-    const result = await query(
-      `${SELECT_CAMPANHA}
-       WHERE campanha.id_ong = $1
-       ORDER BY campanha.criado_em DESC, campanha.id_campanha DESC
-       LIMIT $2 OFFSET $3`,
-      [idOng, limite, pular],
-    );
-    return result.rows;
+// Quais campanhas listar:
+// - sem idOng: as ativas de todas as ONGs (vitrine pública);
+// - com idOng: as ativas daquela ONG (página pública da ONG);
+// - com idOng e todosOsStatus: todas daquela ONG, até rascunhos (painel da ONG).
+export async function listarCampanhas(
+  { idOng, todosOsStatus },
+  { limite, pagina },
+) {
+  let filtro;
+  let valores;
+  if (idOng && todosOsStatus) {
+    filtro = "campanha.id_ong = $1";
+    valores = [idOng];
+  } else if (idOng) {
+    filtro = "campanha.id_ong = $1 AND campanha.status = 'ativa'";
+    valores = [idOng];
+  } else {
+    filtro = "campanha.status = 'ativa'";
+    valores = [];
   }
+
+  // 1ª consulta: quantas campanhas existem no total (para a paginação).
+  const contagem = await query(
+    `SELECT COUNT(*) AS total FROM campanha WHERE ${filtro}`,
+    valores,
+  );
+  const total = Number(contagem.rows[0].total);
+
+  // 2ª consulta: só as campanhas da página pedida.
+  // LIMIT e OFFSET entram depois dos valores do filtro: se o filtro usa $1,
+  // eles viram $2 e $3; se o filtro não usa nenhum, viram $1 e $2.
+  const posicaoDoLimite = valores.length + 1;
+  const posicaoDoOffset = valores.length + 2;
+  const pular = (pagina - 1) * limite;
 
   const result = await query(
     `${SELECT_CAMPANHA}
-     WHERE campanha.status = 'ativa'
+     WHERE ${filtro}
      ORDER BY campanha.criado_em DESC, campanha.id_campanha DESC
-     LIMIT $1 OFFSET $2`,
-    [limite, pular],
+     LIMIT $${posicaoDoLimite} OFFSET $${posicaoDoOffset}`,
+    [...valores, limite, pular],
   );
-  return result.rows;
+
+  return respostaPaginada(result.rows, total, { limite, pagina });
 }
 
 // Busca uma campanha respeitando quem pode vê-la:
