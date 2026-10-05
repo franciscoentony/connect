@@ -352,11 +352,6 @@ const definition = {
           409: respostaJson("E-mail ou CNPJ já cadastrado", objeto("Erro")),
         },
       },
-      get: {
-        tags: ["Usuários e sessão"],
-        summary: "Lista todos os usuários (rota provisória, sem proteção)",
-        responses: { 200: { description: "Lista de usuários" } },
-      },
     },
 
     "/api/v1/sessao": {

@@ -108,3 +108,11 @@ describe("POST /api/v1/usuarios", () => {
     expect(r.status).toBe(400);
   });
 });
+
+describe("GET /api/v1/usuarios", () => {
+  test("não existe: a lista de usuários não pode ser pública", async () => {
+    const r = await api("/api/v1/usuarios");
+
+    expect(r.status).toBe(405);
+  });
+});
