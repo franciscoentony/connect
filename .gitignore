@@ -44,3 +44,22 @@ next-env.d.ts
 cookies.txt
 doador.txt
 ong.txt
+
+# editor e ferramentas pessoais
+.VSCodeCounter/
+.claude/settings.local.json
+
+# impeccable (ferramenta de design com IA)
+# Cada pessoa instala na própria máquina com:
+#   npx impeccable install --providers=claude --project
+# Por isso não versionamos a instalação (inclui um binário que só roda no Mac)
+# nem as cópias no formato do GitHub Copilot.
+.claude/skills/
+.claude/agents/
+.github/agents/
+.github/hooks/
+.github/skills/
+# configurações pessoais e históricos de crítica
+.impeccable/config.local.json
+.impeccable/critique/
+.impeccable/live/
