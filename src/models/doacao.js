@@ -154,6 +154,17 @@ export async function listarDoacoesPendentesDaOng(idOng, limite) {
   return result.rows;
 }
 
+// Quantas doações da campanha a ONG já confirmou (dinheiro ou item).
+// Mostrado na página pública como sinal de confiança.
+export async function contarDoacoesConfirmadas(idCampanha) {
+  const result = await query(
+    `SELECT COUNT(*) AS total FROM doacao
+     WHERE id_campanha = $1 AND status = 'confirmada'`,
+    [idCampanha],
+  );
+  return Number(result.rows[0].total);
+}
+
 // ---------- escrita ----------
 
 export async function criarDoacao(idDoador, idCampanha, dados) {
