@@ -1,6 +1,7 @@
 import { query } from "infra/database.js";
 import { ErroDeNegocio } from "@/lib/erros.js";
 import { respostaPaginada } from "@/lib/requisicao.js";
+import { urlDaFotoDaCampanha } from "@/lib/imagem.js";
 
 // Para qual status cada status pode mudar.
 // Ex.: uma campanha "rascunho" pode virar "ativa" ou "cancelada".
@@ -21,7 +22,8 @@ export function campanhaFinalizada(campanha) {
 // - o nome da ONG (JOIN com a tabela ong);
 // - "arrecadado": a soma das doações em dinheiro já confirmadas.
 //   O COALESCE troca o resultado por 0 quando ainda não há doações
-//   (sem ele, a soma de nenhuma linha seria NULL).
+//   (sem ele, a soma de nenhuma linha seria NULL);
+// - "id_foto_capa": a primeira foto enviada (menor id), ou NULL se não tem.
 const SELECT_CAMPANHA = `
   SELECT campanha.id_campanha, campanha.id_ong, ong.nome AS ong_nome,
          campanha.titulo, campanha.meta, campanha.status, campanha.criado_em,
@@ -30,10 +32,25 @@ const SELECT_CAMPANHA = `
            WHERE doacao.id_campanha = campanha.id_campanha
              AND doacao.status = 'confirmada'
              AND doacao.tipo = 'dinheiro'
-         ), 0) AS arrecadado
+         ), 0) AS arrecadado,
+         (
+           SELECT MIN(foto_campanha.id_foto) FROM foto_campanha
+           WHERE foto_campanha.id_campanha = campanha.id_campanha
+         ) AS id_foto_capa
   FROM campanha
   JOIN ong ON ong.id_usuario = campanha.id_ong
 `;
+
+// Troca o "id_foto_capa" pela URL pronta para usar no <img src="...">.
+// Sem foto, "capa_url" fica null (o frontend mostra um fundo cinza).
+function adicionarCapa(linha) {
+  const { id_foto_capa, ...campanha } = linha;
+  campanha.capa_url = null;
+  if (id_foto_capa) {
+    campanha.capa_url = urlDaFotoDaCampanha(campanha.id_campanha, id_foto_capa);
+  }
+  return campanha;
+}
 
 // ---------- validação ----------
 
@@ -81,7 +98,7 @@ export async function buscarCampanha(id) {
   if (result.rows.length === 0) {
     return null;
   }
-  return result.rows[0];
+  return adicionarCapa(result.rows[0]);
 }
 
 // Quais campanhas listar:
@@ -127,7 +144,8 @@ export async function listarCampanhas(
     [...valores, limite, pular],
   );
 
-  return respostaPaginada(result.rows, total, { limite, pagina });
+  const campanhas = result.rows.map(adicionarCapa);
+  return respostaPaginada(campanhas, total, { limite, pagina });
 }
 
 // Busca uma campanha respeitando quem pode vê-la:
