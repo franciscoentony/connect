@@ -53,10 +53,13 @@ export async function lerSessao() {
   if (!cookie) {
     return null;
   }
+  return verificarToken(cookie.value);
+}
 
+export async function verificarToken(token) {
   const chave = chaveSecreta();
   try {
-    const { payload } = await jwtVerify(cookie.value, chave, {
+    const { payload } = await jwtVerify(token, chave, {
       algorithms: ["HS256"],
     });
     return { id_usuario: payload.sub, tipo: payload.tipo };
