@@ -228,3 +228,19 @@ export async function atualizarStatus(id, sessao, novoStatus) {
   }
   return buscarDoacao(id);
 }
+
+// ---------- página pública da ONG ----------
+
+// Quantas pessoas diferentes já tiveram doação CONFIRMADA em alguma
+// campanha da ONG. O DISTINCT conta cada doador uma vez só, mesmo que ele
+// tenha doado várias vezes.
+export async function contarContribuidoresDaOng(idOng) {
+  const result = await query(
+    `SELECT COUNT(DISTINCT doacao.id_doador) AS total
+     FROM doacao
+     JOIN campanha ON campanha.id_campanha = doacao.id_campanha
+     WHERE campanha.id_ong = $1 AND doacao.status = 'confirmada'`,
+    [idOng],
+  );
+  return Number(result.rows[0].total);
+}
