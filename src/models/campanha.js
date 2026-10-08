@@ -105,8 +105,10 @@ export async function buscarCampanha(id) {
 // - sem idOng: as ativas de todas as ONGs (vitrine pública);
 // - com idOng: as ativas daquela ONG (página pública da ONG);
 // - com idOng e todosOsStatus: todas daquela ONG, até rascunhos (painel da ONG).
+// Com "busca", só as campanhas com esse texto no título (sem diferenciar
+// maiúsculas e minúsculas).
 export async function listarCampanhas(
-  { idOng, todosOsStatus },
+  { idOng, todosOsStatus, busca },
   { limite, pagina },
 ) {
   let filtro;
@@ -120,6 +122,13 @@ export async function listarCampanhas(
   } else {
     filtro = "campanha.status = 'ativa'";
     valores = [];
+  }
+
+  // ILIKE é o LIKE que ignora maiúsculas; "%" quer dizer "qualquer texto".
+  // O texto entra como parâmetro ($n), nunca colado no SQL.
+  if (busca) {
+    valores.push(`%${busca}%`);
+    filtro += ` AND campanha.titulo ILIKE $${valores.length}`;
   }
 
   // 1ª consulta: quantas campanhas existem no total (para a paginação).
