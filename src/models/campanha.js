@@ -293,3 +293,40 @@ export async function removerLocal(idCampanha, idLocal, idOng) {
     throw new ErroDeNegocio("local não encontrado", 404);
   }
 }
+
+// ---------- painel da ONG ----------
+
+// Números do topo do painel da ONG (dashboard):
+// - quantas campanhas estão ativas;
+// - quanto já foi arrecadado (só doações em dinheiro CONFIRMADAS);
+// - quantas doações estão esperando a ONG confirmar.
+export async function resumoDoPainel(idOng) {
+  const ativas = await query(
+    "SELECT COUNT(*) AS total FROM campanha WHERE id_ong = $1 AND status = 'ativa'",
+    [idOng],
+  );
+
+  const arrecadado = await query(
+    `SELECT COALESCE(SUM(doacao.valor), 0) AS total
+     FROM doacao
+     JOIN campanha ON campanha.id_campanha = doacao.id_campanha
+     WHERE campanha.id_ong = $1
+       AND doacao.status = 'confirmada'
+       AND doacao.tipo = 'dinheiro'`,
+    [idOng],
+  );
+
+  const pendentes = await query(
+    `SELECT COUNT(*) AS total
+     FROM doacao
+     JOIN campanha ON campanha.id_campanha = doacao.id_campanha
+     WHERE campanha.id_ong = $1 AND doacao.status = 'pendente'`,
+    [idOng],
+  );
+
+  return {
+    campanhasAtivas: Number(ativas.rows[0].total),
+    arrecadado: Number(arrecadado.rows[0].total),
+    doacoesPendentes: Number(pendentes.rows[0].total),
+  };
+}

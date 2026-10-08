@@ -140,6 +140,20 @@ export async function listarDoacoesDaCampanha(
   return respostaPaginada(result.rows, total, { limite, pagina });
 }
 
+// Doações que esperam a ONG confirmar, de todas as campanhas dela.
+// As mais antigas vêm primeiro: quem doou há mais tempo espera há mais tempo.
+// Usado no dashboard ("Precisa da sua atenção").
+export async function listarDoacoesPendentesDaOng(idOng, limite) {
+  const result = await query(
+    `${SELECT_DOACAO}
+     WHERE campanha.id_ong = $1 AND doacao.status = 'pendente'
+     ORDER BY doacao.data ASC, doacao.id_doacao ASC
+     LIMIT $2`,
+    [idOng, limite],
+  );
+  return result.rows;
+}
+
 // ---------- escrita ----------
 
 export async function criarDoacao(idDoador, idCampanha, dados) {
