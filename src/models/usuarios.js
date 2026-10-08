@@ -57,11 +57,14 @@ export async function buscarUsuarioPorId(id) {
 
   if (usuario.tipo === "ong") {
     const perfil = await query(
-      "SELECT nome, cnpj FROM ong WHERE id_usuario = $1",
+      "SELECT nome, cnpj, descricao, site, contato FROM ong WHERE id_usuario = $1",
       [id],
     );
     usuario.nome = perfil.rows[0].nome;
     usuario.cnpj = perfil.rows[0].cnpj;
+    usuario.descricao = perfil.rows[0].descricao;
+    usuario.site = perfil.rows[0].site;
+    usuario.contato = perfil.rows[0].contato;
   } else {
     const perfil = await query(
       "SELECT nome FROM doador WHERE id_usuario = $1",
@@ -85,23 +88,58 @@ export async function buscarUsuarioPorId(id) {
 
 // ---------- perfil ----------
 
-// Por enquanto só o nome pode ser alterado.
+// O que pode ser alterado:
+// - doador: nome;
+// - ONG: nome, descrição, site e contato.
+// Os campos não enviados continuam iguais.
 // E-mail e CNPJ identificam a conta; mudá-los exige outra verificação.
 export async function atualizarPerfil(sessao, dados) {
-  const nome = validarNome(dados?.nome);
+  const veioNome = dados?.nome !== undefined;
 
-  if (sessao.tipo === "ong") {
-    await query("UPDATE ong SET nome = $1 WHERE id_usuario = $2", [
-      nome,
-      sessao.id_usuario,
-    ]);
-  } else {
+  if (sessao.tipo === "doador") {
+    if (!veioNome) {
+      throw new ErroDeNegocio("Nenhum campo para atualizar");
+    }
+    const nome = validarNome(dados.nome);
     await query("UPDATE doador SET nome = $1 WHERE id_usuario = $2", [
       nome,
       sessao.id_usuario,
     ]);
+    return buscarUsuarioPorId(sessao.id_usuario);
   }
 
+  const veioDescricao = dados?.descricao !== undefined;
+  const veioSite = dados?.site !== undefined;
+  const veioContato = dados?.contato !== undefined;
+  if (!veioNome && !veioDescricao && !veioSite && !veioContato) {
+    throw new ErroDeNegocio("Nenhum campo para atualizar");
+  }
+
+  // Começa com os valores atuais e troca só o que foi enviado.
+  const atual = await buscarUsuarioPorId(sessao.id_usuario);
+  let nome = atual.nome;
+  let descricao = atual.descricao;
+  let site = atual.site;
+  let contato = atual.contato;
+
+  if (veioNome) {
+    nome = validarNome(dados.nome);
+  }
+  if (veioDescricao) {
+    descricao = validarTextoOpcional(dados.descricao, 500, "descrição");
+  }
+  if (veioSite) {
+    site = validarSite(dados.site);
+  }
+  if (veioContato) {
+    contato = validarTextoOpcional(dados.contato, 150, "contato");
+  }
+
+  await query(
+    `UPDATE ong SET nome = $1, descricao = $2, site = $3, contato = $4
+     WHERE id_usuario = $5`,
+    [nome, descricao, site, contato, sessao.id_usuario],
+  );
   return buscarUsuarioPorId(sessao.id_usuario);
 }
 
@@ -109,7 +147,8 @@ export async function atualizarPerfil(sessao, dados) {
 // (O CNPJ é público na Receita Federal e ajuda o doador a confiar na ONG.)
 export async function buscarOngPublica(id) {
   const result = await query(
-    `SELECT ong.id_usuario AS id_ong, ong.nome, ong.cnpj, usuario.criado_em,
+    `SELECT ong.id_usuario AS id_ong, ong.nome, ong.cnpj, ong.descricao,
+            ong.site, ong.contato, usuario.criado_em,
             foto_usuario.atualizado_em AS foto_atualizada_em
      FROM ong
      JOIN usuario ON usuario.id_usuario = ong.id_usuario
@@ -144,6 +183,47 @@ function validarNome(valor) {
     throw new ErroDeNegocio("nome deve ter entre 2 e 150 caracteres");
   }
   return nome;
+}
+
+// Texto opcional: vazio vira null (apaga o que estava salvo).
+function validarTextoOpcional(valor, maximo, nomeDoCampo) {
+  const texto = String(valor ?? "").trim();
+  if (texto === "") {
+    return null;
+  }
+  if (texto.length > maximo) {
+    throw new ErroDeNegocio(
+      `${nomeDoCampo} deve ter no máximo ${maximo} caracteres`,
+    );
+  }
+  return texto;
+}
+
+// Aceita "amigos.org.br" ou "https://amigos.org.br" (sem "https://", ele é
+// adicionado). Só aceita endereços http/https: o site vira um link na página
+// pública, e um link "javascript:..." executaria código de quem clicasse.
+function validarSite(valor) {
+  let texto = String(valor ?? "").trim();
+  if (texto === "") {
+    return null;
+  }
+  if (!/^https?:\/\//i.test(texto)) {
+    texto = `https://${texto}`;
+  }
+
+  let endereco;
+  try {
+    endereco = new URL(texto); // lança erro se não for um endereço válido
+  } catch {
+    throw new ErroDeNegocio("site inválido");
+  }
+  const ehHttp =
+    endereco.protocol === "http:" || endereco.protocol === "https:";
+  // "amigos.org.br" tem ponto; "amigos" sozinho não é um site
+  if (!ehHttp || !endereco.hostname.includes(".") || texto.length > 255) {
+    throw new ErroDeNegocio("site inválido");
+  }
+  return texto;
 }
 
 function validar(dados) {

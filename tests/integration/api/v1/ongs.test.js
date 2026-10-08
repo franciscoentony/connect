@@ -25,7 +25,10 @@ describe("GET /api/v1/ongs/{id}", () => {
       nome: "ONG de Teste",
       cnpj: expect.stringMatching(/^\d{14}$/),
       criado_em: expect.any(String),
-      foto_url: null, // a ONG de teste ainda não enviou foto
+      descricao: null, // a ONG de teste ainda não preencheu o perfil
+      site: null,
+      contato: null,
+      foto_url: null,
     });
   });
 
