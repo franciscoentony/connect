@@ -218,6 +218,24 @@ const definition = {
             description: "Só para ONG",
             example: "12345678000190",
           },
+          descricao: {
+            type: "string",
+            nullable: true,
+            description: "Só para ONG",
+            example: "Levamos alimento a famílias em situação de rua.",
+          },
+          site: {
+            type: "string",
+            nullable: true,
+            description: "Só para ONG",
+            example: "https://amigos.org.br",
+          },
+          contato: {
+            type: "string",
+            nullable: true,
+            description: "Só para ONG: telefone ou e-mail público",
+            example: "(84) 99999-0000",
+          },
           foto_url: {
             type: "string",
             nullable: true,
@@ -232,6 +250,22 @@ const definition = {
           id_ong: { type: "string", example: "1" },
           nome: { type: "string", example: "Amigos do Bem" },
           cnpj: { type: "string", example: "12345678000190" },
+          descricao: {
+            type: "string",
+            nullable: true,
+            example: "Levamos alimento a famílias em situação de rua.",
+          },
+          site: {
+            type: "string",
+            nullable: true,
+            example: "https://amigos.org.br",
+          },
+          contato: {
+            type: "string",
+            nullable: true,
+            description: "Telefone ou e-mail público",
+            example: "(84) 99999-0000",
+          },
           criado_em: { type: "string", format: "date-time" },
           foto_url: {
             type: "string",
@@ -498,14 +532,25 @@ const definition = {
     "/api/v1/perfil": {
       patch: {
         tags: ["Usuários e sessão"],
-        summary: "Altera o nome do usuário logado",
-        description: "E-mail e CNPJ não podem ser alterados por aqui.",
+        summary: "Altera o perfil do usuário logado",
+        description:
+          "Doador: só o nome. ONG: nome, descrição, site e contato. Campos não enviados continuam iguais; texto vazio apaga o campo. E-mail e CNPJ não podem ser alterados por aqui.",
         security: PRECISA_LOGIN,
         requestBody: corpoJson({
           type: "object",
-          required: ["nome"],
           properties: {
             nome: { type: "string", minLength: 2, maxLength: 150 },
+            descricao: { type: "string", maxLength: 500 },
+            site: {
+              type: "string",
+              description:
+                "http ou https; sem protocolo, recebe https:// (ex.: amigos.org.br)",
+            },
+            contato: {
+              type: "string",
+              maxLength: 150,
+              description: "Telefone ou e-mail público",
+            },
           },
         }),
         responses: {
