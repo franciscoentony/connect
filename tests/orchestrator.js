@@ -51,6 +51,48 @@ export async function api(
   return { status: resposta.status, corpo: json, headers: resposta.headers };
 }
 
+// Uma imagem PNG de 1x1 pixel, para os testes de foto.
+export const PNG_PEQUENO = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+  "base64",
+);
+
+// Envia um arquivo como formulário (multipart), no campo "foto".
+// O Content-Type do formulário é montado pelo próprio fetch.
+export async function enviarFoto(
+  caminho,
+  { metodo = "POST", cookie, bytes = PNG_PEQUENO, tipo = "image/png" } = {},
+) {
+  const formulario = new FormData();
+  formulario.append("foto", new Blob([bytes], { type: tipo }), "foto.png");
+
+  const resposta = await fetch(`${BASE}${caminho}`, {
+    method: metodo,
+    headers: cookie ? { Cookie: cookie } : {},
+    body: formulario,
+  });
+  const texto = await resposta.text();
+  let json = null;
+  try {
+    json = texto ? JSON.parse(texto) : null;
+  } catch {
+    // resposta que não é JSON: mantém null
+  }
+  return { status: resposta.status, corpo: json };
+}
+
+// Baixa uma imagem e devolve o status, o tipo e os bytes.
+export async function baixar(caminho, { cookie } = {}) {
+  const resposta = await fetch(`${BASE}${caminho}`, {
+    headers: cookie ? { Cookie: cookie } : {},
+  });
+  return {
+    status: resposta.status,
+    tipo: resposta.headers.get("content-type"),
+    bytes: Buffer.from(await resposta.arrayBuffer()),
+  };
+}
+
 // ---------- fábricas de dados ----------
 
 async function cadastrar(corpo) {

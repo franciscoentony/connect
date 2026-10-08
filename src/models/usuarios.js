@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import pool, { query } from "infra/database.js";
 import { ErroDeNegocio } from "@/lib/erros.js";
+import { urlDaFotoDoPerfil, urlDaFotoDaOng } from "@/lib/imagem.js";
 
 // Quanto maior, mais lento (e mais difícil de quebrar) é o hash da senha.
 const CUSTO_DO_HASH = 12;
@@ -69,6 +70,16 @@ export async function buscarUsuarioPorId(id) {
     usuario.nome = perfil.rows[0].nome;
   }
 
+  // Foto de perfil: só a data da última troca, para montar a URL (sem os bytes).
+  const foto = await query(
+    "SELECT atualizado_em FROM foto_usuario WHERE id_usuario = $1",
+    [id],
+  );
+  usuario.foto_url = null;
+  if (foto.rows.length > 0) {
+    usuario.foto_url = urlDaFotoDoPerfil(foto.rows[0].atualizado_em);
+  }
+
   return usuario;
 }
 
@@ -98,16 +109,25 @@ export async function atualizarPerfil(sessao, dados) {
 // (O CNPJ é público na Receita Federal e ajuda o doador a confiar na ONG.)
 export async function buscarOngPublica(id) {
   const result = await query(
-    `SELECT ong.id_usuario AS id_ong, ong.nome, ong.cnpj, usuario.criado_em
+    `SELECT ong.id_usuario AS id_ong, ong.nome, ong.cnpj, usuario.criado_em,
+            foto_usuario.atualizado_em AS foto_atualizada_em
      FROM ong
      JOIN usuario ON usuario.id_usuario = ong.id_usuario
+     LEFT JOIN foto_usuario ON foto_usuario.id_usuario = ong.id_usuario
      WHERE ong.id_usuario = $1`,
     [id],
   );
   if (result.rows.length === 0) {
     throw new ErroDeNegocio("ONG não encontrada", 404);
   }
-  return result.rows[0];
+
+  // LEFT JOIN: a ONG aparece mesmo sem foto (aí foto_atualizada_em é NULL).
+  const { foto_atualizada_em, ...ong } = result.rows[0];
+  ong.foto_url = null;
+  if (foto_atualizada_em) {
+    ong.foto_url = urlDaFotoDaOng(ong.id_ong, foto_atualizada_em);
+  }
+  return ong;
 }
 
 // ---------- cadastro ----------

@@ -70,6 +70,35 @@ function listaPaginada(nomeDoSchema) {
 function objeto(nomeDoSchema) {
   return { $ref: `#/components/schemas/${nomeDoSchema}` };
 }
+// Corpo com um arquivo: formulário (multipart) com o campo "foto".
+const CORPO_FOTO = {
+  required: true,
+  content: {
+    "multipart/form-data": {
+      schema: {
+        type: "object",
+        required: ["foto"],
+        properties: {
+          foto: {
+            type: "string",
+            format: "binary",
+            description: "JPG, PNG ou WEBP de até 2 MB",
+          },
+        },
+      },
+    },
+  },
+};
+// Resposta que é a própria imagem (não JSON)
+const RESPOSTA_IMAGEM = {
+  description: "A imagem",
+  content: {
+    "image/jpeg": { schema: { type: "string", format: "binary" } },
+    "image/png": { schema: { type: "string", format: "binary" } },
+    "image/webp": { schema: { type: "string", format: "binary" } },
+  },
+};
+const ERRO_413 = respostaJson("Foto maior que 2 MB", objeto("Erro"));
 
 const definition = {
   openapi: "3.0.0",
@@ -87,6 +116,7 @@ const definition = {
     { name: "Usuários e sessão" },
     { name: "Campanhas" },
     { name: "Locais de entrega" },
+    { name: "Fotos" },
     { name: "Doações" },
     { name: "Donatários" },
     { name: "Sistema" },
@@ -188,6 +218,12 @@ const definition = {
             description: "Só para ONG",
             example: "12345678000190",
           },
+          foto_url: {
+            type: "string",
+            nullable: true,
+            description: "URL da foto de perfil (null se não tem foto)",
+            example: "/api/v1/perfil/foto?v=1791451200000",
+          },
         },
       },
       OngPublica: {
@@ -197,6 +233,12 @@ const definition = {
           nome: { type: "string", example: "Amigos do Bem" },
           cnpj: { type: "string", example: "12345678000190" },
           criado_em: { type: "string", format: "date-time" },
+          foto_url: {
+            type: "string",
+            nullable: true,
+            description: "URL pública da foto da ONG (null se não tem foto)",
+            example: "/api/v1/ongs/1/foto?v=1791451200000",
+          },
         },
       },
       Login: {
@@ -259,6 +301,26 @@ const definition = {
             description: "Soma das doações em dinheiro confirmadas",
             example: "150.00",
           },
+          capa_url: {
+            type: "string",
+            nullable: true,
+            description: "URL da primeira foto da galeria (null se não tem)",
+            example: "/api/v1/campanhas/1/fotos/3",
+          },
+        },
+      },
+
+      // ---------- fotos ----------
+      Foto: {
+        type: "object",
+        properties: {
+          id_foto: { type: "string", example: "3" },
+          url: {
+            type: "string",
+            description: "Use direto no <img src>",
+            example: "/api/v1/campanhas/1/fotos/3",
+          },
+          criado_em: { type: "string", format: "date-time" },
         },
       },
 
@@ -463,6 +525,113 @@ const definition = {
         parameters: [PARAM_ID("Id da ONG")],
         responses: {
           200: respostaJson("ONG", objeto("OngPublica")),
+          404: ERRO_404,
+        },
+      },
+    },
+
+    "/api/v1/perfil/foto": {
+      get: {
+        tags: ["Fotos"],
+        summary: "Foto de perfil do usuário logado (devolve a imagem)",
+        security: PRECISA_LOGIN,
+        responses: { 200: RESPOSTA_IMAGEM, 401: ERRO_401, 404: ERRO_404 },
+      },
+      put: {
+        tags: ["Fotos"],
+        summary: "Envia ou troca a foto de perfil",
+        security: PRECISA_LOGIN,
+        requestBody: CORPO_FOTO,
+        responses: {
+          200: respostaJson("Perfil com a nova foto_url", objeto("Perfil")),
+          400: ERRO_400,
+          401: ERRO_401,
+          413: ERRO_413,
+        },
+      },
+      delete: {
+        tags: ["Fotos"],
+        summary: "Remove a foto de perfil",
+        security: PRECISA_LOGIN,
+        responses: {
+          204: { description: "Removida" },
+          401: ERRO_401,
+          404: ERRO_404,
+        },
+      },
+    },
+
+    "/api/v1/ongs/{id}/foto": {
+      get: {
+        tags: ["Fotos"],
+        summary: "Foto pública de uma ONG (devolve a imagem)",
+        parameters: [PARAM_ID("Id da ONG")],
+        responses: { 200: RESPOSTA_IMAGEM, 404: ERRO_404 },
+      },
+    },
+
+    "/api/v1/campanhas/{id}/fotos": {
+      get: {
+        tags: ["Fotos"],
+        summary: "Galeria da campanha (a primeira foto é a capa)",
+        description:
+          "Rascunho e cancelada só aparecem para a ONG dona; para os outros é 404.",
+        parameters: [PARAM_ID("Id da campanha")],
+        responses: {
+          200: respostaJson("Lista de fotos", lista("Foto")),
+          404: ERRO_404,
+        },
+      },
+      post: {
+        tags: ["Fotos"],
+        summary: "Adiciona uma foto (máximo 8 por campanha). Só a ONG dona.",
+        security: PRECISA_LOGIN,
+        parameters: [PARAM_ID("Id da campanha")],
+        requestBody: CORPO_FOTO,
+        responses: {
+          201: respostaJson("Foto adicionada", objeto("Foto")),
+          400: ERRO_400,
+          401: ERRO_401,
+          403: ERRO_403,
+          404: ERRO_404,
+          409: ERRO_409,
+          413: ERRO_413,
+        },
+      },
+    },
+
+    "/api/v1/campanhas/{id}/fotos/{idFoto}": {
+      get: {
+        tags: ["Fotos"],
+        summary: "Uma foto da campanha (devolve a imagem)",
+        parameters: [
+          PARAM_ID("Id da campanha"),
+          {
+            name: "idFoto",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        responses: { 200: RESPOSTA_IMAGEM, 404: ERRO_404 },
+      },
+      delete: {
+        tags: ["Fotos"],
+        summary: "Remove uma foto. Só a ONG dona.",
+        security: PRECISA_LOGIN,
+        parameters: [
+          PARAM_ID("Id da campanha"),
+          {
+            name: "idFoto",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          204: { description: "Removida" },
+          401: ERRO_401,
+          403: ERRO_403,
           404: ERRO_404,
         },
       },
