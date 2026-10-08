@@ -1,0 +1,45 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faMagnifyingGlass,
+  faChevronDown,
+} from "@fortawesome/free-solid-svg-icons";
+import ThemeToggle from "@/(components)/ui/ThemeToggle";
+
+// Barra do topo do painel da ONG: busca + usuário.
+//
+// Uso: <Topbar usuario={{ nome: "Entony", foto_url: "/api/v1/perfil/foto?v=1" }} />
+
+export default function Topbar({ usuario }) {
+  return (
+    <div className="flex w-full items-center justify-between gap-4 rounded-3xl bg-neutral-0 px-4 py-4 shadow-suave lg:px-6 lg:py-5">
+      <label className="flex w-full max-w-100 min-w-0 items-center gap-3 rounded-xl bg-neutral-100 px-4 py-3 text-neutral-500">
+        <FontAwesomeIcon icon={faMagnifyingGlass} />
+        <input
+          placeholder="Buscar campanha"
+          aria-label="Buscar campanha"
+          className="w-full bg-transparent text-base text-neutral-900 outline-none placeholder:text-neutral-500"
+        />
+      </label>
+
+      <div className="flex shrink-0 items-center gap-3 lg:gap-6">
+        <ThemeToggle />
+        {usuario && (
+          <button className="flex items-center gap-3 cursor-pointer">
+            <img
+              src={usuario.foto_url || "/identity/co.png"}
+              alt=""
+              className="size-11 rounded-full bg-neutral-200 object-cover"
+            />
+            {/* no celular fica só a foto, para caber a busca */}
+            <span className="hidden font-semibold text-neutral-900 md:inline">
+              Olá, {usuario.nome}!
+            </span>
+            <span className="hidden text-sm text-neutral-700 md:inline">
+              <FontAwesomeIcon icon={faChevronDown} />
+            </span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
