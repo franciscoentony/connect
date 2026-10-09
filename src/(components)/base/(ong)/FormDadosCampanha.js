@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import Button from "@/(components)/ui/Button";
 import Input from "@/(components)/ui/Input";
 
-// Aba "Dados" do gerenciar campanha: edita título e meta.
+// Aba "Dados" do gerenciar campanha: edita título, meta, descrição e o
+// último dia para doar. A descrição é obrigatória para publicar.
 // Salva em PATCH /api/v1/campanhas/{id}.
 // Campanha encerrada ou cancelada não pode mudar: os campos ficam travados.
 //
@@ -21,6 +22,9 @@ export default function FormDadosCampanha({ campanha, bloqueado }) {
   const router = useRouter();
   const [titulo, setTitulo] = useState(campanha.titulo);
   const [meta, setMeta] = useState(metaParaTela(campanha.meta));
+  // campo que ainda não foi preenchido vem null; o Input precisa de texto
+  const [descricao, setDescricao] = useState(campanha.descricao ?? "");
+  const [terminaEm, setTerminaEm] = useState(campanha.termina_em ?? "");
   const [mensagem, setMensagem] = useState("");
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
@@ -40,7 +44,12 @@ export default function FormDadosCampanha({ campanha, bloqueado }) {
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ titulo, meta: metaParaApi }),
+          body: JSON.stringify({
+            titulo,
+            meta: metaParaApi,
+            descricao,
+            termina_em: terminaEm,
+          }),
         },
       );
       const dados = await resposta.json();
@@ -69,6 +78,23 @@ export default function FormDadosCampanha({ campanha, bloqueado }) {
         dica="De 3 a 150 caracteres"
         value={titulo}
         onChange={setTitulo}
+        desabilitado={bloqueado}
+      />
+      <Input
+        rotulo="Descrição"
+        placeholder="Para que é a doação e quem será ajudado?"
+        dica="Obrigatória para publicar · de 20 a 2000 caracteres"
+        multilinha
+        value={descricao}
+        onChange={setDescricao}
+        desabilitado={bloqueado}
+      />
+      <Input
+        rotulo="Último dia para doar"
+        type="date"
+        dica="Opcional · depois dessa data a campanha não recebe doações"
+        value={terminaEm}
+        onChange={setTerminaEm}
         desabilitado={bloqueado}
       />
       <Input

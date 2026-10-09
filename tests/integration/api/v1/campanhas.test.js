@@ -309,3 +309,82 @@ describe("locais de entrega", () => {
     expect(r.status).toBe(409);
   });
 });
+
+describe("descrição e data de término da campanha", () => {
+  const criar = (corpo) =>
+    api("/api/v1/campanhas", { metodo: "POST", cookie: ong.cookie, corpo });
+
+  // amanhã, no formato AAAA-MM-DD (nunca está no passado)
+  const amanha = () => {
+    const data = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+    return data.toISOString().slice(0, 10);
+  };
+
+  test("cria com descrição e término, e eles voltam na resposta", async () => {
+    const termino = amanha();
+    const r = await criar({
+      titulo: "Inverno Quentinho",
+      descricao: "  Agasalhos para 40 famílias em situação de rua.  ",
+      termina_em: termino,
+    });
+
+    expect(r.status).toBe(201);
+    expect(r.corpo.descricao).toBe(
+      "Agasalhos para 40 famílias em situação de rua.",
+    );
+    expect(r.corpo.termina_em).toBe(termino);
+  });
+
+  test("rascunho pode ficar sem descrição, mas não pode ser publicado", async () => {
+    const r = await criar({ titulo: "Sem descrição ainda" });
+    expect(r.status).toBe(201);
+    expect(r.corpo.descricao).toBeNull();
+
+    const publicar = await patch(r.corpo.id_campanha, ong.cookie, {
+      status: "ativa",
+    });
+    expect(publicar.status).toBe(409);
+    expect(publicar.corpo.erro).toBe(
+      "adicione uma descrição antes de publicar a campanha",
+    );
+  });
+
+  test("publica quando a descrição chega no mesmo PATCH", async () => {
+    const r = await criar({ titulo: "Publica junto" });
+
+    const publicar = await patch(r.corpo.id_campanha, ong.cookie, {
+      status: "ativa",
+      descricao: "Cestas básicas para as famílias da zona norte.",
+    });
+    expect(publicar.status).toBe(200);
+    expect(publicar.corpo.status).toBe("ativa");
+  });
+
+  test("texto vazio apaga a descrição e o término", async () => {
+    const r = await criar({
+      titulo: "Apagar campos",
+      descricao: "Descrição que será apagada em seguida.",
+      termina_em: amanha(),
+    });
+
+    const apagar = await patch(r.corpo.id_campanha, ong.cookie, {
+      descricao: "",
+      termina_em: "",
+    });
+    expect(apagar.status).toBe(200);
+    expect(apagar.corpo.descricao).toBeNull();
+    expect(apagar.corpo.termina_em).toBeNull();
+  });
+
+  test.each([
+    ["descrição curta demais", { descricao: "curta" }],
+    ["descrição longa demais", { descricao: "a".repeat(2001) }],
+    ["data em formato errado", { termina_em: "20/12/2026" }],
+    ["data que não existe", { termina_em: "2026-02-31" }],
+    ["data no passado", { termina_em: "2020-01-01" }],
+  ])("rejeita %s com 400", async (_descricao, extra) => {
+    const r = await criar({ titulo: "Campanha inválida", ...extra });
+
+    expect(r.status).toBe(400);
+  });
+});

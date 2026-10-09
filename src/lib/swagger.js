@@ -301,6 +301,23 @@ const definition = {
             description: "Opcional, em reais",
             example: 5000,
           },
+          descricao: {
+            type: "string",
+            nullable: true,
+            minLength: 20,
+            maxLength: 2000,
+            description:
+              "Para que é a campanha. Opcional no rascunho; obrigatória para publicar.",
+            example: "Vamos comprar presentes para 50 crianças do bairro.",
+          },
+          termina_em: {
+            type: "string",
+            format: "date",
+            nullable: true,
+            description:
+              "Último dia para doar (AAAA-MM-DD). Não pode estar no passado.",
+            example: "2026-12-20",
+          },
         },
       },
       AlterarCampanha: {
@@ -309,11 +326,28 @@ const definition = {
         properties: {
           titulo: { type: "string", minLength: 3, maxLength: 150 },
           meta: { type: "number", nullable: true },
+          descricao: {
+            type: "string",
+            nullable: true,
+            minLength: 20,
+            maxLength: 2000,
+            description:
+              "Para que é a campanha. Opcional no rascunho; obrigatória para publicar.",
+            example: "Vamos comprar presentes para 50 crianças do bairro.",
+          },
+          termina_em: {
+            type: "string",
+            format: "date",
+            nullable: true,
+            description:
+              "Último dia para doar (AAAA-MM-DD). Não pode estar no passado.",
+            example: "2026-12-20",
+          },
           status: {
             type: "string",
             enum: ["ativa", "encerrada", "cancelada"],
             description:
-              "Mudanças permitidas: rascunho → ativa ou cancelada; ativa → encerrada ou cancelada.",
+              "Mudanças permitidas: rascunho → ativa ou cancelada; ativa → encerrada ou cancelada. Para publicar (ativa), a campanha precisa de descrição.",
           },
         },
       },
@@ -324,6 +358,19 @@ const definition = {
           id_ong: { type: "string", example: "1" },
           ong_nome: { type: "string", example: "Amigos do Bem" },
           titulo: { type: "string", example: "Natal Solidário" },
+          descricao: {
+            type: "string",
+            nullable: true,
+            example: "Vamos comprar presentes para 50 crianças do bairro.",
+          },
+          termina_em: {
+            type: "string",
+            format: "date",
+            nullable: true,
+            description:
+              "Último dia para doar; depois dele a campanha não recebe doações",
+            example: "2026-12-20",
+          },
           meta: { type: "string", nullable: true, example: "5000.00" },
           status: {
             type: "string",
