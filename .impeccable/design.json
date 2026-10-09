@@ -1,0 +1,577 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-08T18:50:54.306179+00:00",
+  "title": "Design System: Connect",
+  "extensions": {
+    "colorMeta": {
+      "lavanda-solidaria": {
+        "role": "primary",
+        "displayName": "Lavanda Solidária",
+        "canonical": "#775bf0",
+        "tonalRamp": [
+          "#2a2450",
+          "#3d3380",
+          "#4f42a6",
+          "#6a55c5",
+          "#775bf0",
+          "#a99af7",
+          "#d3cbfb",
+          "#eae6fd"
+        ]
+      },
+      "lavanda-profunda": {
+        "role": "primary",
+        "displayName": "Lavanda Profunda",
+        "canonical": "#6a55c5",
+        "tonalRamp": [
+          "#1b1339",
+          "#2c205f",
+          "#3e2d85",
+          "#503aab",
+          "#735fc9",
+          "#a295db",
+          "#cdc6ec",
+          "#eeecf9"
+        ]
+      },
+      "lavanda-nevoa": {
+        "role": "primary",
+        "displayName": "Névoa Lavanda",
+        "canonical": "#eae6fd",
+        "tonalRamp": [
+          "#110647",
+          "#1c0976",
+          "#280da5",
+          "#3311d5",
+          "#5839ef",
+          "#907bf4",
+          "#c3b8f9",
+          "#ebe7fd"
+        ]
+      },
+      "limao-esperanca": {
+        "role": "secondary",
+        "displayName": "Limão Esperança",
+        "canonical": "#82ce2d",
+        "tonalRamp": [
+          "#23301a",
+          "#34501a",
+          "#4c7a22",
+          "#679f29",
+          "#82ce2d",
+          "#9bdb53",
+          "#c9ec9f",
+          "#ecf7df"
+        ]
+      },
+      "limao-maduro": {
+        "role": "secondary",
+        "displayName": "Limão Maduro",
+        "canonical": "#679f29",
+        "tonalRamp": [
+          "#273d10",
+          "#42651a",
+          "#5c8e25",
+          "#76b62f",
+          "#97d355",
+          "#bae28d",
+          "#daefc2",
+          "#f3faeb"
+        ]
+      },
+      "limao-nevoa": {
+        "role": "secondary",
+        "displayName": "Névoa Limão",
+        "canonical": "#ecf7df",
+        "tonalRamp": [
+          "#283d0f",
+          "#436619",
+          "#5e8f24",
+          "#78b82e",
+          "#99d454",
+          "#bbe28d",
+          "#dbf0c2",
+          "#f3faeb"
+        ]
+      },
+      "verde-confirmado": {
+        "role": "tertiary",
+        "displayName": "Verde Confirmado",
+        "canonical": "#17c964",
+        "tonalRamp": [
+          "#084522",
+          "#0d7239",
+          "#12a050",
+          "#18ce66",
+          "#3fe988",
+          "#7ff0b0",
+          "#baf7d5",
+          "#e8fcf1"
+        ]
+      },
+      "verde-confirmado-nevoa": {
+        "role": "tertiary",
+        "displayName": "Névoa Verde Confirmado",
+        "canonical": "#d1f4e0",
+        "tonalRamp": [
+          "#0f3e23",
+          "#19673a",
+          "#229051",
+          "#2cb969",
+          "#52d68b",
+          "#8ce3b1",
+          "#c1f0d5",
+          "#eafaf1"
+        ]
+      },
+      "rosa-alerta": {
+        "role": "tertiary",
+        "displayName": "Rosa Alerta",
+        "canonical": "#f31260",
+        "tonalRamp": [
+          "#49041c",
+          "#79062e",
+          "#aa0941",
+          "#da0b53",
+          "#f53376",
+          "#f877a4",
+          "#fbb6ce",
+          "#fee7ef"
+        ]
+      },
+      "rosa-alerta-nevoa": {
+        "role": "tertiary",
+        "displayName": "Névoa Rosa Alerta",
+        "canonical": "#fdd0df",
+        "tonalRamp": [
+          "#49031b",
+          "#7a052c",
+          "#ab073e",
+          "#dc0950",
+          "#f63273",
+          "#f976a2",
+          "#fcb6cd",
+          "#fee7ee"
+        ]
+      },
+      "azul-aguardando": {
+        "role": "tertiary",
+        "displayName": "Azul Aguardando",
+        "canonical": "#006fee",
+        "tonalRamp": [
+          "#00244c",
+          "#003b80",
+          "#0053b2",
+          "#006be6",
+          "#298dff",
+          "#70b3ff",
+          "#b2d6ff",
+          "#e5f1ff"
+        ]
+      },
+      "azul-aguardando-nevoa": {
+        "role": "tertiary",
+        "displayName": "Névoa Azul Aguardando",
+        "canonical": "#cce3fd",
+        "tonalRamp": [
+          "#03244a",
+          "#053c7b",
+          "#0754ac",
+          "#096cdd",
+          "#318ef7",
+          "#76b4fa",
+          "#b5d7fc",
+          "#e6f2fe"
+        ]
+      },
+      "tinta": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "canonical": "#11181c",
+        "tonalRamp": [
+          "#11181c",
+          "#3f3f46",
+          "#71717a",
+          "#d4d4d8",
+          "#e4e4e7",
+          "#f1f1f3",
+          "#f4f4f5",
+          "#fafafa"
+        ]
+      },
+      "grafite": {
+        "role": "neutral",
+        "displayName": "Grafite",
+        "canonical": "#3f3f46",
+        "tonalRamp": [
+          "#11181c",
+          "#3f3f46",
+          "#71717a",
+          "#d4d4d8",
+          "#e4e4e7",
+          "#f1f1f3",
+          "#f4f4f5",
+          "#fafafa"
+        ]
+      },
+      "cinza-medio": {
+        "role": "neutral",
+        "displayName": "Cinza Médio",
+        "canonical": "#6d6d76",
+        "tonalRamp": [
+          "#11181c",
+          "#3f3f46",
+          "#71717a",
+          "#d4d4d8",
+          "#e4e4e7",
+          "#f1f1f3",
+          "#f4f4f5",
+          "#fafafa"
+        ]
+      },
+      "cinza-borda-forte": {
+        "role": "neutral",
+        "displayName": "Borda Forte",
+        "canonical": "#d4d4d8",
+        "tonalRamp": [
+          "#11181c",
+          "#3f3f46",
+          "#71717a",
+          "#d4d4d8",
+          "#e4e4e7",
+          "#f1f1f3",
+          "#f4f4f5",
+          "#fafafa"
+        ]
+      },
+      "cinza-borda": {
+        "role": "neutral",
+        "displayName": "Cinza Borda",
+        "canonical": "#e4e4e7",
+        "tonalRamp": [
+          "#11181c",
+          "#3f3f46",
+          "#71717a",
+          "#d4d4d8",
+          "#e4e4e7",
+          "#f1f1f3",
+          "#f4f4f5",
+          "#fafafa"
+        ]
+      },
+      "cinza-campo": {
+        "role": "neutral",
+        "displayName": "Cinza Campo",
+        "canonical": "#f4f4f5",
+        "tonalRamp": [
+          "#11181c",
+          "#3f3f46",
+          "#71717a",
+          "#d4d4d8",
+          "#e4e4e7",
+          "#f1f1f3",
+          "#f4f4f5",
+          "#fafafa"
+        ]
+      },
+      "cinza-sutil": {
+        "role": "neutral",
+        "displayName": "Cinza Sutil",
+        "canonical": "#fafafa",
+        "tonalRamp": [
+          "#11181c",
+          "#3f3f46",
+          "#71717a",
+          "#d4d4d8",
+          "#e4e4e7",
+          "#f1f1f3",
+          "#f4f4f5",
+          "#fafafa"
+        ]
+      },
+      "branco-superficie": {
+        "role": "neutral",
+        "displayName": "Branco Superfície",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#11181c",
+          "#3f3f46",
+          "#71717a",
+          "#d4d4d8",
+          "#e4e4e7",
+          "#f1f1f3",
+          "#f4f4f5",
+          "#fafafa"
+        ]
+      },
+      "fundo-painel": {
+        "role": "neutral",
+        "displayName": "Fundo do Painel",
+        "canonical": "#f1f1f3",
+        "tonalRamp": [
+          "#11181c",
+          "#3f3f46",
+          "#71717a",
+          "#d4d4d8",
+          "#e4e4e7",
+          "#f1f1f3",
+          "#f4f4f5",
+          "#fafafa"
+        ]
+      },
+      "noite-praca": {
+        "role": "neutral",
+        "displayName": "Noite da Praça",
+        "canonical": "#14151c",
+        "tonalRamp": [
+          "#11181c",
+          "#3f3f46",
+          "#71717a",
+          "#d4d4d8",
+          "#e4e4e7",
+          "#f1f1f3",
+          "#f4f4f5",
+          "#fafafa"
+        ]
+      },
+      "texto-sobre-verde": {
+        "role": "neutral",
+        "displayName": "Texto sobre Verde",
+        "canonical": "#11181c",
+        "tonalRamp": ["#11181c"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Só a frase principal da home."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Título de seção e de página do painel."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Título de card e de bloco."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Texto corrido e células de tabela."
+      },
+      "body-small": {
+        "displayName": "Body Small",
+        "purpose": "Texto de apoio, dicas e metadados."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Cabeçalho de tabela, em maiúsculas."
+      }
+    },
+    "shadows": [
+      {
+        "name": "suave",
+        "value": "0 1px 2px rgb(17 24 28 / 0.04), 0 12px 32px -8px rgb(17 24 28 / 0.06)",
+        "purpose": "Cards, tabelas, formulários, menu lateral, barra do topo e menu público."
+      },
+      {
+        "name": "modal",
+        "value": "0 24px 64px -12px rgb(17 24 28 / 0.18)",
+        "purpose": "Só janelas sobre a página (modais)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "padrao",
+        "value": "300ms ease",
+        "purpose": "Hover de links, abas e itens do menu."
+      },
+      {
+        "name": "botao",
+        "value": "200ms ease",
+        "purpose": "Mudança de cor de botões."
+      },
+      {
+        "name": "tema",
+        "value": "500ms ease",
+        "purpose": "Transição do fundo ao trocar tema claro/escuro."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      }
+    ],
+    "darkTheme": {
+      "note": "Mesmas variáveis com outros valores na classe .dark",
+      "bg-pagina": "#14151c",
+      "neutral-0": "#1c1d27",
+      "neutral-100": "#262733",
+      "neutral-900": "#f4f4f6",
+      "primary-500": "#775bf0",
+      "primary-600": "#a99af7"
+    }
+  },
+  "components": [
+    {
+      "name": "Botão Primário",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "A ação principal da tela (Doar, Publicar campanha).",
+      "html": "<button class=\"ds-btn-primario\">Quero doar</button>",
+      "css": ".ds-btn-primario { font-family: var(--font-manrope), Manrope, sans-serif; display:inline-flex; align-items:center; justify-content:center; border:none; border-radius:12px; padding:14px 28px; font-size:16px; font-weight:600; cursor:pointer; transition: background-color .2s ease, filter .2s ease; background: var(--primary-500); color: #fff; } .ds-btn-primario:hover { filter: brightness(0.94); } .ds-btn-primario:focus-visible { outline: 2px solid var(--primary-500); outline-offset: 2px; }"
+    },
+    {
+      "name": "Botão Secundário",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Confirmar/concluir: confirmar doação, encerrar campanha.",
+      "html": "<button class=\"ds-btn-secundario\">Confirmar doação</button>",
+      "css": ".ds-btn-secundario { font-family: var(--font-manrope), Manrope, sans-serif; display:inline-flex; align-items:center; justify-content:center; border:none; border-radius:12px; padding:14px 28px; font-size:16px; font-weight:600; cursor:pointer; transition: background-color .2s ease, filter .2s ease; background: var(--secondary-500); color: var(--texto-sobre-verde); } .ds-btn-secundario:hover { background: var(--secondary-600); } .ds-btn-secundario:focus-visible { outline: 2px solid var(--primary-500); outline-offset: 2px; }"
+    },
+    {
+      "name": "Botão Suave",
+      "kind": "button",
+      "refersTo": "button-soft",
+      "description": "Ações leves: Contribuir agora, Ver página pública.",
+      "html": "<button class=\"ds-btn-suave\">Contribuir agora</button>",
+      "css": ".ds-btn-suave { font-family: var(--font-manrope), Manrope, sans-serif; display:inline-flex; align-items:center; justify-content:center; border:none; border-radius:12px; padding:14px 28px; font-size:16px; font-weight:600; cursor:pointer; transition: background-color .2s ease, filter .2s ease; background: var(--primary-100); color: var(--primary-600); } .ds-btn-suave:hover { filter: brightness(0.97); } .ds-btn-suave:focus-visible { outline: 2px solid var(--primary-500); outline-offset: 2px; }"
+    },
+    {
+      "name": "Botão Contorno",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Ação alternativa: Editar, Entrar em contato.",
+      "html": "<button class=\"ds-btn-contorno\">Entrar em contato</button>",
+      "css": ".ds-btn-contorno { font-family: var(--font-manrope), Manrope, sans-serif; display:inline-flex; align-items:center; justify-content:center; border:none; border-radius:12px; padding:14px 28px; font-size:16px; font-weight:600; cursor:pointer; transition: background-color .2s ease, filter .2s ease; background: var(--neutral-0); color: var(--neutral-900); border: 2px solid var(--neutral-300); padding: 12px 26px; } .ds-btn-contorno:hover { background: var(--neutral-100); } .ds-btn-contorno:focus-visible { outline: 2px solid var(--primary-500); outline-offset: 2px; }"
+    },
+    {
+      "name": "Botão Perigo",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Excluir, cancelar, sair da conta.",
+      "html": "<button class=\"ds-btn-perigo\">Excluir</button>",
+      "css": ".ds-btn-perigo { font-family: var(--font-manrope), Manrope, sans-serif; display:inline-flex; align-items:center; justify-content:center; border:none; border-radius:12px; padding:14px 28px; font-size:16px; font-weight:600; cursor:pointer; transition: background-color .2s ease, filter .2s ease; background: var(--danger-100); color: var(--danger-500); } .ds-btn-perigo:hover { filter: brightness(0.96); } .ds-btn-perigo:focus-visible { outline: 2px solid var(--primary-500); outline-offset: 2px; }"
+    },
+    {
+      "name": "Chips de status",
+      "kind": "chip",
+      "refersTo": "chip-pendente",
+      "description": "Status de doação e campanha, com os nomes do backend.",
+      "html": "<div class=\"ds-chips\"><span class=\"ds-chip ds-chip-pendente\"><i></i>Pendente</span><span class=\"ds-chip ds-chip-confirmada\"><i></i>Confirmada</span><span class=\"ds-chip ds-chip-cancelada\"><i></i>Cancelada</span><span class=\"ds-chip ds-chip-ativa\"><i></i>Ativa</span><span class=\"ds-chip ds-chip-rascunho\"><i></i>Rascunho</span></div>",
+      "css": ".ds-chips { display:flex; flex-wrap:wrap; gap:8px; } .ds-chip { font-family: var(--font-manrope), Manrope, sans-serif; display:inline-flex; align-items:center; gap:8px; padding:6px 14px 6px 12px; border-radius:9999px; font-size:14px; font-weight:600; } .ds-chip i { width:8px; height:8px; border-radius:9999px; background: currentColor; } .ds-chip-pendente { background: var(--info-100); color: var(--info-500); } .ds-chip-confirmada { background: var(--success-100); color: var(--success-500); } .ds-chip-cancelada { background: var(--danger-100); color: var(--danger-500); } .ds-chip-ativa { background: var(--success-500); color: var(--texto-sobre-verde); } .ds-chip-rascunho { background: var(--neutral-100); color: var(--neutral-700); }"
+    },
+    {
+      "name": "Campo de texto",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo com rótulo em cima e dica embaixo.",
+      "html": "<label class=\"ds-campo\"><span class=\"ds-campo-rotulo\">E-mail</span><input class=\"ds-campo-input\" placeholder=\"voce@exemplo.com\"><span class=\"ds-campo-dica\">Usamos só para o login</span></label>",
+      "css": ".ds-campo { font-family: var(--font-manrope), Manrope, sans-serif; display:flex; flex-direction:column; gap:8px; width:320px; } .ds-campo-rotulo { font-size:14px; font-weight:600; color: var(--neutral-900); } .ds-campo-input { font-family: var(--font-manrope), Manrope, sans-serif; background: var(--neutral-100); color: var(--neutral-900); border:none; border-radius:12px; padding:14px 16px; font-size:16px; outline:none; transition: box-shadow .2s ease; } .ds-campo-input::placeholder { color: var(--neutral-500); } .ds-campo-input:focus-visible { box-shadow: 0 0 0 2px var(--primary-500); } .ds-campo-dica { font-size:12px; font-weight:500; color: var(--neutral-500); }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Superfície padrão de blocos, formulários e resumos.",
+      "html": "<div class=\"ds-card\"><h3>Onde entregar as doações</h3><p>Rua das Flores, 120 · Natal-RN</p></div>",
+      "css": ".ds-card { font-family: var(--font-manrope), Manrope, sans-serif; width:320px; background: var(--neutral-0); border-radius:16px; padding:24px; box-shadow: 0 1px 2px rgb(17 24 28 / 0.04), 0 12px 32px -8px rgb(17 24 28 / 0.06); display:flex; flex-direction:column; gap:8px; } .ds-card h3 { margin:0; font-size:20px; font-weight:600; color: var(--neutral-900); } .ds-card p { margin:0; font-size:14px; color: var(--neutral-900); opacity:.7; }"
+    },
+    {
+      "name": "Menu público",
+      "kind": "nav",
+      "refersTo": "navbar",
+      "description": "Pílula fixa no topo das páginas públicas.",
+      "html": "<nav class=\"ds-nav\"><strong class=\"ds-nav-logo\">CONNECT</strong><div class=\"ds-nav-links\"><a href=\"#\" class=\"ds-nav-link\">Início</a><a href=\"#\" class=\"ds-nav-link\">Campanhas</a><a href=\"#\" class=\"ds-nav-link\">Contato</a></div><a href=\"#\" class=\"ds-nav-cta\">Vamos começar!</a></nav>",
+      "css": ".ds-nav { font-family: var(--font-manrope), Manrope, sans-serif; display:flex; align-items:center; justify-content:space-between; gap:32px; width:720px; background: var(--neutral-100); border-radius:9999px; padding:8px 16px 8px 36px; box-shadow: 0 1px 2px rgb(17 24 28 / 0.04), 0 12px 32px -8px rgb(17 24 28 / 0.06); } .ds-nav-logo { font-size:18px; letter-spacing:.05em; color: var(--neutral-900); } .ds-nav-links { display:flex; gap:32px; } .ds-nav-link { font-size:16px; font-weight:500; color: var(--neutral-700); text-decoration:none; transition: color .3s ease; } .ds-nav-link:hover { color: var(--neutral-900); } .ds-nav-cta { border-radius:9999px; padding:14px 28px; font-weight:600; text-decoration:none; color: var(--primary-600); background: color-mix(in srgb, var(--primary-500) 20%, transparent); transition: background-color .2s ease, color .2s ease; } .ds-nav-cta:hover { background: var(--primary-500); color:#fff; } .ds-nav-link:focus-visible, .ds-nav-cta:focus-visible { outline: 2px solid var(--primary-500); outline-offset: 2px; }"
+    },
+    {
+      "name": "Card de campanha",
+      "kind": "custom",
+      "refersTo": "card-campanha",
+      "description": "Componente assinatura: capa, status, título, progresso e ação.",
+      "html": "<article class=\"ds-campanha\"><div class=\"ds-campanha-capa\"><span class=\"ds-campanha-chip\"><i></i>Ativa</span></div><h3>Natal Solidário</h3><p class=\"ds-campanha-ong\">por Amigos do Bem · Natal-RN</p><div class=\"ds-campanha-barra\"><div style=\"width:60%\"></div></div><p class=\"ds-campanha-valor\">R$ 3.000 arrecadados de R$ 5.000</p><button class=\"ds-campanha-botao\">Contribuir agora</button></article>",
+      "css": ".ds-campanha { font-family: var(--font-manrope), Manrope, sans-serif; width:320px; background: var(--neutral-0); border-radius:28px; padding:16px; display:flex; flex-direction:column; gap:12px; box-shadow: 0 1px 2px rgb(17 24 28 / 0.04), 0 12px 32px -8px rgb(17 24 28 / 0.06); } .ds-campanha-capa { height:180px; border-radius:20px; background: var(--neutral-200); display:flex; align-items:flex-end; padding:12px; } .ds-campanha-chip { display:inline-flex; align-items:center; gap:8px; padding:6px 14px 6px 12px; border-radius:9999px; background: var(--success-500); color: var(--texto-sobre-verde); font-size:14px; font-weight:600; } .ds-campanha-chip i { width:8px; height:8px; border-radius:9999px; background:currentColor; } .ds-campanha h3 { margin:4px 8px 0; font-size:20px; font-weight:600; color: var(--neutral-900); } .ds-campanha-ong { margin:0 8px; font-size:14px; color: var(--neutral-500); } .ds-campanha-barra { margin:0 8px; height:8px; border-radius:9999px; background: var(--neutral-100); overflow:hidden; } .ds-campanha-barra div { height:100%; border-radius:9999px; background: var(--primary-500); } .ds-campanha-valor { margin:0 8px; font-size:14px; font-weight:600; color: var(--primary-600); } .ds-campanha-botao { font-family: var(--font-manrope), Manrope, sans-serif; display:inline-flex; align-items:center; justify-content:center; border:none; border-radius:12px; padding:14px 28px; font-size:16px; font-weight:600; cursor:pointer; transition: background-color .2s ease, filter .2s ease; width:100%; background: var(--primary-100); color: var(--primary-600); } .ds-campanha-botao:hover { background: var(--primary-500); color:#fff; } .ds-campanha-botao:focus-visible { outline: 2px solid var(--primary-500); outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "A Praça Solidária",
+    "overview": "O Connect é um lugar público e acolhedor onde a comunidade se encontra para ajudar. Como uma boa praça, ele é aberto, iluminado e organizado: dá para ver tudo de longe, ninguém se perde, e cada canto convida a chegar mais perto. A atmosfera é acolhedora e confiável: calor humano de ONG de bairro, com a ordem de quem cuida bem do que recebe.\n\nOs elementos são macios e convidativos: cantos generosos, fundos lavanda e cinza bem claros, sombras quase imperceptíveis e muito respiro entre os blocos. A cor aparece com intenção: a Lavanda Solidária chama para agir, o Limão Esperança celebra o que deu certo, e as cores de status contam ao doador, sem ambiguidade, onde está a doação dele. O tema escuro é a mesma praça à noite (Noite da Praça, nunca preto puro), com as mesmas cores levemente acesas.\n\nO Connect não deve parecer um sistema de banco: nada frio, burocrático ou de tabelas sem respiro. Mesmo no painel da ONG, onde há dados e tabelas, os blocos são arredondados, espaçados e com a voz gentil do produto.",
+    "keyCharacteristics": [
+      "Uma única família tipográfica (Manrope), só de Regular a Bold.",
+      "Lavanda como cor de ação; verde reservado para sucesso e confirmação.",
+      "Superfícies brancas sobre fundo claro, separadas só por tom e sombras difusas: sem bordas de contorno (borda é exclusiva dos botões).",
+      "Cantos arredondados em todos os níveis, do botão (12px) ao card de campanha (28px) e às pílulas (chips, menu).",
+      "Tema claro e escuro completos, trocados só por variáveis."
+    ],
+    "rules": [
+      {
+        "name": "The Uma Cor, Um Significado Rule",
+        "body": "Verde é sempre \"confirmado/ativo/deu certo\", azul é sempre \"aguardando\", rosa é sempre \"cancelado/erro/destrutivo\". Nunca use uma cor de status como decoração: o doador aprende a ler o status pela cor.",
+        "section": "colors"
+      },
+      {
+        "name": "The Contraste AA Rule",
+        "body": "Todo texto tem contraste de pelo menos 4,5:1 com o fundo (WCAG AA). Por isso: texto e ícone roxo usam a Lavanda Profunda (`primary-600`), não a Lavanda Solidária; texto sobre verde é sempre escuro; e texto branco sobre a faixa roxa não leva opacidade.",
+        "section": "colors"
+      },
+      {
+        "name": "The Variável Sempre Rule",
+        "body": "Cor só pelos tokens (`bg-primary-500`, `text-neutral-900`…). Hex direto no componente quebra o tema escuro; a única exceção documentada é o rosa do coração de favoritar (`#fb6894`).",
+        "section": "colors"
+      },
+      {
+        "name": "The Opacidade, Não Cinza Rule",
+        "body": "Texto secundário usa a cor do texto com opacidade (`opacity-70` / `opacity-80`), não um cinza diferente. Assim ele acompanha o tema claro e o escuro sozinho.",
+        "section": "typography"
+      },
+      {
+        "name": "The Regular-a-Bold Rule",
+        "body": "Só os pesos 400, 500, 600 e 700 da Manrope. Nada de Light ou ExtraBold.",
+        "section": "typography"
+      },
+      {
+        "name": "The Sombra Que Não Se Vê Rule",
+        "body": "A sombra suave deve ser sentida, não vista. Se dá para apontar onde a sombra está, ela está forte demais. Uma superfície nunca recebe mais de uma sombra.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Nada Quina Viva Rule",
+        "body": "Nenhum elemento visível tem canto reto. Se um elemento novo não se encaixa na escala acima, use o raio do vizinho mais próximo em tamanho.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Borda É de Botão Rule",
+        "body": "Contorno é sinal de \"clicável\". Se o elemento não é um botão (ou uma opção selecionável que funciona como botão), ele não tem borda: a separação vem do fundo e da sombra.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do usar só os tokens de cor do `globals.css`; o tema escuro depende disso.",
+      "Do reservar a Lavanda Solidária para a ação principal e o estado ativo.",
+      "Do usar verde, azul e rosa sempre com o mesmo significado de status.",
+      "Do arredondar tudo seguindo a escala (12 → 16 → 24 → 28px → pílula).",
+      "Do usar a sombra Suave em superfícies e a sombra Modal só em janelas.",
+      "Do dar respiro: 24px entre campos, 32–48px entre blocos, 80px entre seções públicas.",
+      "Do mostrar estados vazios como um card branco com sombra suave e uma frase que diga o próximo passo."
+    ],
+    "donts": [
+      "Don't deixar o site com cara de sistema de banco: nada de telas densas, tabelas sem respiro, cinza dominante ou linguagem burocrática.",
+      "Don't usar cor fixa (hex) nos componentes, nem preto puro no tema escuro (o fundo escuro é `#14151c`).",
+      "Don't usar uma segunda família de fonte, nem pesos fora de 400–700.",
+      "Don't usar cinza para texto secundário; use opacidade.",
+      "Don't usar verde para enfeite ou rosa para destacar algo que não é erro ou ação destrutiva.",
+      "Don't empilhar sombras ou deixar a sombra visível a ponto de \"flutuar\".",
+      "Don't criar cantos retos.",
+      "Don't colocar borda de contorno em nada que não seja botão."
+    ]
+  }
+}

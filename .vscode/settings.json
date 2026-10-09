@@ -1,0 +1,38 @@
+{
+  // Tailwind CSS IntelliSense: o globals.css importa o Tailwind através do
+  // "@heroui/styles", então a extensão não acha o Tailwind sozinha.
+  // Aqui dizemos qual é o CSS principal do projeto.
+  "tailwindCSS.experimental.configFile": "src/app/globals.css",
+
+  // Sugere classes também em textos dentro de objetos/variáveis, como em
+  // const VARIANTES = { primario: "bg-primary-500 ..." } nos componentes.
+  "tailwindCSS.classFunctions": ["clsx", "cn", "tv"],
+  "tailwindCSS.experimental.classRegex": [
+    [
+      "(?:VARIANTES|TAMANHOS|ESTILOS|CORES)\\s*=\\s*\\{([\\s\\S]*?)\\n\\};?",
+      "[\"'`]([^\"'`]*)[\"'`]"
+    ]
+  ],
+
+  // Os componentes são arquivos .js com JSX. Abrimos eles como
+  // "JavaScript React" para o editor entender o JSX como nos .jsx.
+  // E reconhecemos @theme, @custom-variant etc. no CSS (sem avisos falsos).
+  "files.associations": {
+    "*.js": "javascriptreact",
+    "*.css": "tailwindcss"
+  },
+
+  // Emmet no JSX: digite "div", "section", "button"... e aperte Tab
+  // (ou escolha na lista) para virar <div></div>, sem precisar do "<".
+  // Também funciona com abreviações: ul>li*3, div.flex.gap-4, etc.
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact"
+  },
+  "emmet.triggerExpansionOnTab": true,
+  "emmet.showExpandedAbbreviation": "always",
+
+  // Sugestões também dentro de strings (onde ficam as classes)
+  "editor.quickSuggestions": {
+    "strings": "on"
+  }
+}
