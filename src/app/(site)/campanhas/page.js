@@ -84,7 +84,8 @@ export default async function Campanhas({ searchParams }) {
           </div>
         </section>
 
-        {/* lista */}
+        {/* lista (o h2 só existe para leitores de tela: os cards usam h3) */}
+        <h2 className="sr-only">Lista de campanhas</h2>
         {campanhas.itens.length === 0 ? (
           <div className="flex flex-col items-center gap-2 rounded-2xl bg-neutral-0 p-10 text-center shadow-suave">
             {textoBuscado ? (
