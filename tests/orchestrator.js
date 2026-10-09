@@ -144,7 +144,13 @@ export async function criarCampanha(cookie, dados = {}) {
   const r = await api("/api/v1/campanhas", {
     metodo: "POST",
     cookie,
-    corpo: { titulo: "Campanha de teste", meta: 1000, ...dados },
+    corpo: {
+      titulo: "Campanha de teste",
+      meta: 1000,
+      // sem descrição a campanha não pode ser publicada
+      descricao: "Campanha criada pelos testes automatizados do Connect.",
+      ...dados,
+    },
   });
   if (r.status !== 201) {
     throw new Error(
@@ -185,6 +191,22 @@ export async function criarDonatario(cookie, dados = {}) {
     );
   }
   return r.corpo;
+}
+
+// Coloca o fim da campanha no passado (ontem), direto no banco.
+// A API não deixa escolher uma data passada, mas o tempo passa: é assim que
+// testamos uma campanha cujo prazo acabou.
+export async function terminarPrazoNoBanco(idCampanha) {
+  const client = new Client({ connectionString: process.env.DATABASE_URL });
+  await client.connect();
+  try {
+    await client.query(
+      "UPDATE campanha SET termina_em = CURRENT_DATE - 1 WHERE id_campanha = $1",
+      [idCampanha],
+    );
+  } finally {
+    await client.end();
+  }
 }
 
 // ---------- limpeza ----------

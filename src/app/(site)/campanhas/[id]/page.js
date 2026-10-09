@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCalendar,
+  faClock,
   faChevronRight,
   faLocationDot,
   faIdCard,
@@ -12,13 +13,18 @@ import Button from "@/(components)/ui/Button";
 import Chip from "@/(components)/ui/Chip";
 import QueroDoar from "@/(components)/base/(public)/QueroDoar";
 import GaleriaCampanha from "@/(components)/base/(public)/GaleriaCampanha";
-import { obterCampanhaVisivel, listarLocais } from "@/models/campanha.js";
+import {
+  obterCampanhaVisivel,
+  listarLocais,
+  campanhaTerminou,
+  hojeNoBrasil,
+} from "@/models/campanha.js";
 import { listarMetodos, contarDoacoesConfirmadas } from "@/models/doacao.js";
 import { listarFotosDaCampanha } from "@/models/foto.js";
 import { buscarOngPublica } from "@/models/usuarios.js";
 import { lerSessao } from "@/lib/sessao.js";
 import { ehIdValido } from "@/lib/requisicao.js";
-import { formatarCnpj } from "@/lib/formatar.js";
+import { formatarCnpj, formatarData, diasAte } from "@/lib/formatar.js";
 
 // Página de detalhe da campanha: /campanhas/12
 // É um componente de servidor: busca os dados direto nos models do backend,
@@ -84,6 +90,23 @@ export default async function DetalheCampanha({ params }) {
     : null;
   const criadaEm = new Date(campanha.criado_em).toLocaleDateString("pt-BR");
 
+  // prazo: "Último dia para doar: 20/12/2026 · faltam 5 dias"
+  const prazoEncerrado = campanhaTerminou(campanha);
+  let textoDoPrazo = null;
+  if (campanha.termina_em) {
+    const data = formatarData(campanha.termina_em);
+    const dias = diasAte(campanha.termina_em, hojeNoBrasil());
+    if (prazoEncerrado) {
+      textoDoPrazo = `Prazo encerrado em ${data}`;
+    } else if (dias === 0) {
+      textoDoPrazo = `Último dia para doar: hoje (${data})`;
+    } else if (dias === 1) {
+      textoDoPrazo = `Último dia para doar: ${data} · falta 1 dia`;
+    } else {
+      textoDoPrazo = `Último dia para doar: ${data} · faltam ${dias} dias`;
+    }
+  }
+
   return (
     <main className="flex w-full flex-1 flex-col items-center px-4 pt-36 pb-20">
       <div className="flex w-full max-w-7xl flex-col gap-6">
@@ -124,7 +147,26 @@ export default async function DetalheCampanha({ params }) {
                 <FontAwesomeIcon icon={faCalendar} />
                 criada em {criadaEm}
               </p>
+              {textoDoPrazo && (
+                <p className="flex items-center gap-2 text-sm font-semibold">
+                  <FontAwesomeIcon
+                    icon={faClock}
+                    className="text-primary-600"
+                  />
+                  {textoDoPrazo}
+                </p>
+              )}
             </div>
+
+            {/* para que é a campanha: o doador lê antes de decidir */}
+            {campanha.descricao && (
+              <section className="flex flex-col gap-3">
+                <h2 className="text-xl font-semibold">Sobre a campanha</h2>
+                <p className="max-w-prose whitespace-pre-line leading-relaxed">
+                  {campanha.descricao}
+                </p>
+              </section>
+            )}
           </article>
 
           {/* coluna da direita: arrecadação, locais e ONG */}
@@ -171,6 +213,7 @@ export default async function DetalheCampanha({ params }) {
                 status={campanha.status}
                 tipoUsuario={sessao?.tipo}
                 metodos={metodos}
+                prazoEncerrado={prazoEncerrado}
               />
 
               {/* o que protege o doador, antes de ele decidir */}

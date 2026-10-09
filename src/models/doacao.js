@@ -1,7 +1,11 @@
 import { query } from "infra/database.js";
 import { ErroDeNegocio } from "@/lib/erros.js";
 import { ehIdValido, respostaPaginada } from "@/lib/requisicao.js";
-import { buscarCampanha, obterCampanhaDaOng } from "@/models/campanha.js";
+import {
+  buscarCampanha,
+  obterCampanhaDaOng,
+  campanhaTerminou,
+} from "@/models/campanha.js";
 
 // Código de erro do Postgres para "chave estrangeira aponta para algo que
 // não existe" (ex.: id_metodo de um método de pagamento inexistente).
@@ -234,6 +238,9 @@ export async function criarDoacao(idDoador, idCampanha, dados) {
   }
   if (campanha.status !== "ativa") {
     throw new ErroDeNegocio("a campanha não está recebendo doações", 409);
+  }
+  if (campanhaTerminou(campanha)) {
+    throw new ErroDeNegocio("o prazo desta campanha já terminou", 409);
   }
 
   try {

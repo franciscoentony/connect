@@ -7,6 +7,7 @@ import {
   criarCampanha,
   criarCampanhaAtiva,
   mudarStatusCampanha,
+  terminarPrazoNoBanco,
 } from "../../../orchestrator.js";
 
 let ong, outraOng, doador, outroDoador, metodoId;
@@ -331,5 +332,23 @@ describe("privacidade das doações", () => {
 
     expect(r.corpo).not.toHaveProperty("email");
     expect(r.corpo).not.toHaveProperty("senha_hash");
+  });
+});
+
+describe("campanha com prazo encerrado", () => {
+  test("não recebe novas doações depois da data de término (409)", async () => {
+    const campanha = await criarCampanhaAtiva(ong.cookie, {
+      titulo: "Prazo acabou",
+    });
+    await terminarPrazoNoBanco(campanha.id_campanha);
+
+    const r = await api(`/api/v1/campanhas/${campanha.id_campanha}/doacoes`, {
+      metodo: "POST",
+      cookie: doador.cookie,
+      corpo: { tipo: "item", descricao: "3 cobertores" },
+    });
+
+    expect(r.status).toBe(409);
+    expect(r.corpo.erro).toBe("o prazo desta campanha já terminou");
   });
 });

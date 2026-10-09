@@ -12,7 +12,7 @@ import Segmented from "@/(components)/ui/Segmented";
 
 // Botão "Quero doar" da página da campanha + o modal de doação.
 // Muda conforme quem está vendo:
-//   - campanha que não está ativa: só um aviso
+//   - campanha que não está ativa ou com o prazo encerrado: só um aviso
 //   - visitante: botão que leva para o login
 //   - ONG: aviso de que só doadores doam
 //   - doador: abre o modal e faz POST /api/v1/campanhas/{id}/doacoes
@@ -26,6 +26,7 @@ export default function QueroDoar({
   status,
   tipoUsuario,
   metodos,
+  prazoEncerrado = false,
 }) {
   const [aberto, setAberto] = useState(false);
   const [tipo, setTipo] = useState("Dinheiro"); // "Dinheiro" ou "Item"
@@ -37,6 +38,14 @@ export default function QueroDoar({
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [doado, setDoado] = useState(false);
+
+  if (status === "ativa" && prazoEncerrado) {
+    return (
+      <p className="text-sm opacity-70">
+        O prazo desta campanha terminou. Ela não recebe mais doações.
+      </p>
+    );
+  }
 
   if (status !== "ativa") {
     return (

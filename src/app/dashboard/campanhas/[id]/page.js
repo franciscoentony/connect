@@ -132,6 +132,16 @@ export default async function GerenciarCampanha({ params, searchParams }) {
             <Button variante="suave">Ver página pública</Button>
           </Link>
           {ACOES_DE_STATUS[campanha.status].map((acao) => {
+            // sem descrição a API não deixa publicar: leva para a aba Dados
+            if (acao.status === "ativa" && !campanha.descricao) {
+              return (
+                <Link key={acao.status} href={`${caminho}?aba=dados`}>
+                  <Button variante="suave">
+                    Adicionar descrição para publicar
+                  </Button>
+                </Link>
+              );
+            }
             return (
               <BotaoAcao
                 key={acao.status}

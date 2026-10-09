@@ -17,6 +17,20 @@ export function campanhaFinalizada(campanha) {
   return campanha.status === "encerrada" || campanha.status === "cancelada";
 }
 
+// Data de hoje no horário de Brasília, no formato "2026-12-24".
+// (O servidor roda em UTC: às 22h de Brasília ele já estaria "amanhã".)
+export function hojeNoBrasil() {
+  return new Date().toLocaleDateString("en-CA", {
+    timeZone: "America/Sao_Paulo",
+  });
+}
+
+// A campanha tem data de término e ela já passou?
+// Comparar texto "AAAA-MM-DD" funciona porque a ordem das letras é a das datas.
+export function campanhaTerminou(campanha) {
+  return Boolean(campanha.termina_em) && campanha.termina_em < hojeNoBrasil();
+}
+
 // SELECT usado por todas as buscas de campanha.
 // Além das colunas da campanha, traz:
 // - o nome da ONG (JOIN com a tabela ong);
@@ -26,7 +40,9 @@ export function campanhaFinalizada(campanha) {
 // - "id_foto_capa": a primeira foto enviada (menor id), ou NULL se não tem.
 const SELECT_CAMPANHA = `
   SELECT campanha.id_campanha, campanha.id_ong, ong.nome AS ong_nome,
-         campanha.titulo, campanha.meta, campanha.status, campanha.criado_em,
+         campanha.titulo, campanha.descricao, campanha.meta, campanha.status,
+         campanha.criado_em,
+         to_char(campanha.termina_em, 'YYYY-MM-DD') AS termina_em,
          COALESCE((
            SELECT SUM(doacao.valor) FROM doacao
            WHERE doacao.id_campanha = campanha.id_campanha
@@ -60,6 +76,40 @@ function validarTitulo(valor) {
     throw new ErroDeNegocio("título deve ter entre 3 e 150 caracteres");
   }
   return titulo;
+}
+
+// Opcional na criação e no rascunho; obrigatória para publicar.
+// Vazia vira null.
+function validarDescricao(valor) {
+  const descricao = String(valor ?? "").trim();
+  if (descricao === "") {
+    return null;
+  }
+  if (descricao.length < 20 || descricao.length > 2000) {
+    throw new ErroDeNegocio("descrição deve ter entre 20 e 2000 caracteres");
+  }
+  return descricao;
+}
+
+// Último dia para doar, no formato "2026-12-24". Opcional: vazia vira null.
+function validarTerminaEm(valor) {
+  if (valor === null || valor === undefined || valor === "") {
+    return null;
+  }
+  const texto = String(valor);
+  const data = new Date(`${texto}T12:00:00Z`);
+  // o formato precisa bater e a data precisa existir (recusa "2026-02-31")
+  const valida =
+    /^\d{4}-\d{2}-\d{2}$/.test(texto) &&
+    !Number.isNaN(data.getTime()) &&
+    data.toISOString().slice(0, 10) === texto;
+  if (!valida) {
+    throw new ErroDeNegocio("data de término inválida (use AAAA-MM-DD)");
+  }
+  if (texto < hojeNoBrasil()) {
+    throw new ErroDeNegocio("a data de término não pode estar no passado");
+  }
+  return texto;
 }
 
 // A meta é opcional: vazia vira null (campanha sem meta).
@@ -194,18 +244,21 @@ export async function obterCampanhaDaOng(id, idOng) {
 export async function criarCampanha(idOng, dados) {
   const titulo = validarTitulo(dados?.titulo);
   const meta = validarMeta(dados?.meta);
+  const descricao = validarDescricao(dados?.descricao);
+  const terminaEm = validarTerminaEm(dados?.termina_em);
 
   // O status não vem do cliente: o banco usa o padrão, "rascunho".
   const result = await query(
-    `INSERT INTO campanha (id_ong, titulo, meta)
-     VALUES ($1, $2, $3)
+    `INSERT INTO campanha (id_ong, titulo, meta, descricao, termina_em)
+     VALUES ($1, $2, $3, $4, $5)
      RETURNING id_campanha`,
-    [idOng, titulo, meta],
+    [idOng, titulo, meta, descricao, terminaEm],
   );
   return buscarCampanha(result.rows[0].id_campanha);
 }
 
-// Altera título, meta e/ou status. Os campos não enviados continuam iguais.
+// Altera título, meta, descrição, término e/ou status.
+// Os campos não enviados continuam iguais.
 export async function atualizarCampanha(id, idOng, dados) {
   const atual = await obterCampanhaDaOng(id, idOng);
 
@@ -219,8 +272,16 @@ export async function atualizarCampanha(id, idOng, dados) {
   const veioTitulo = dados?.titulo !== undefined;
   const veioMeta = dados?.meta !== undefined;
   const veioStatus = dados?.status !== undefined;
+  const veioDescricao = dados?.descricao !== undefined;
+  const veioTerminaEm = dados?.termina_em !== undefined;
 
-  if (!veioTitulo && !veioMeta && !veioStatus) {
+  if (
+    !veioTitulo &&
+    !veioMeta &&
+    !veioStatus &&
+    !veioDescricao &&
+    !veioTerminaEm
+  ) {
     throw new ErroDeNegocio("Nenhum campo para atualizar");
   }
 
@@ -228,12 +289,20 @@ export async function atualizarCampanha(id, idOng, dados) {
   let titulo = atual.titulo;
   let meta = atual.meta;
   let status = atual.status;
+  let descricao = atual.descricao;
+  let terminaEm = atual.termina_em;
 
   if (veioTitulo) {
     titulo = validarTitulo(dados.titulo);
   }
   if (veioMeta) {
     meta = validarMeta(dados.meta);
+  }
+  if (veioDescricao) {
+    descricao = validarDescricao(dados.descricao);
+  }
+  if (veioTerminaEm) {
+    terminaEm = validarTerminaEm(dados.termina_em);
   }
   if (veioStatus) {
     if (!PROXIMOS_STATUS[atual.status].includes(dados.status)) {
@@ -245,13 +314,22 @@ export async function atualizarCampanha(id, idOng, dados) {
     status = dados.status;
   }
 
+  // O doador precisa saber para que é a doação antes de doar.
+  if (status === "ativa" && !descricao) {
+    throw new ErroDeNegocio(
+      "adicione uma descrição antes de publicar a campanha",
+      409,
+    );
+  }
+
   // O "AND status = $5" só atualiza se o status ainda for o que lemos acima.
   // Se outra requisição mudou o status nesse meio-tempo, nenhuma linha é
   // atualizada e avisamos o cliente para tentar de novo.
   const result = await query(
-    `UPDATE campanha SET titulo = $1, meta = $2, status = $3
-     WHERE id_campanha = $4 AND status = $5`,
-    [titulo, meta, status, id, atual.status],
+    `UPDATE campanha
+     SET titulo = $1, meta = $2, status = $3, descricao = $4, termina_em = $5
+     WHERE id_campanha = $6 AND status = $7`,
+    [titulo, meta, status, descricao, terminaEm, id, atual.status],
   );
   if (result.rowCount === 0) {
     throw new ErroDeNegocio("a campanha foi alterada, tente novamente", 409);

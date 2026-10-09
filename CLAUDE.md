@@ -278,7 +278,9 @@ Reload Window".
 
 ## 8. Limitações conhecidas (para não estranhar)
 
-- A API ainda **não tem descrição de campanha**.
+- A **descrição** da campanha é opcional no rascunho, mas **obrigatória para
+  publicar**. Depois do **último dia para doar** (`termina_em`, opcional), a
+  campanha não recebe novas doações.
 - **Fotos** (perfil e galeria da campanha) ficam no próprio Postgres, em
   colunas BYTEA (tabelas `foto_usuario` e `foto_campanha`): até 2 MB, só
   JPG/PNG/WEBP, no máximo 8 por campanha, e a primeira foto é a capa.
