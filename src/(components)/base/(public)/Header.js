@@ -24,21 +24,18 @@ export default function Header({ usuario }) {
       ["Início", "/"],
       ["Campanhas", "/campanhas"],
       ["Painel", "/dashboard"],
-      ["Contato", "/contato"],
     ];
   } else if (usuario) {
     links = [
       ["Início", "/"],
       ["Campanhas", "/campanhas"],
       ["Minhas doações", "/minhas-doacoes"],
-      ["Contato", "/contato"],
     ];
   } else {
     links = [
       ["Início", "/"],
       ["Campanhas", "/campanhas"],
-      ["Sobre nós", "/sobre"],
-      ["Contato", "/contato"],
+      ["Sobre nós", "/#quem-somos"],
     ];
   }
 
@@ -63,12 +60,14 @@ export default function Header({ usuario }) {
             </li>
           ))}
           <li>
-            <button
-              aria-label="Buscar"
-              className="hover:text-neutral-900 cursor-pointer"
+            {/* a busca de campanhas fica na página /campanhas */}
+            <Link
+              href="/campanhas"
+              aria-label="Buscar campanhas"
+              className="hover:text-neutral-900"
             >
               <FontAwesomeIcon icon={faMagnifyingGlass} />
-            </button>
+            </Link>
           </li>
         </ul>
 
