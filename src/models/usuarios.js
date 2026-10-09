@@ -309,3 +309,41 @@ export async function criarUsuario(dados) {
     conexao.release();
   }
 }
+
+// ---------- ONGs em destaque (home) ----------
+
+// As ONGs com mais doações CONFIRMADAS em campanhas públicas (ativas ou
+// encerradas). Só entram ONGs com pelo menos uma doação confirmada: é um dado
+// real, que a própria ONG validou, e não expõe nenhum doador (LGPD).
+//
+// Uso: await listarOngsEmDestaque(8) -> [{ id_ong, nome, foto_url, doacoes_confirmadas }]
+export async function listarOngsEmDestaque(limite) {
+  const result = await query(
+    `SELECT ong.id_usuario AS id_ong, ong.nome,
+            foto_usuario.atualizado_em AS foto_atualizada_em,
+            COUNT(doacao.id_doacao) AS doacoes_confirmadas
+     FROM ong
+     JOIN campanha ON campanha.id_ong = ong.id_usuario
+                  AND campanha.status IN ('ativa', 'encerrada')
+     JOIN doacao ON doacao.id_campanha = campanha.id_campanha
+                AND doacao.status = 'confirmada'
+     LEFT JOIN foto_usuario ON foto_usuario.id_usuario = ong.id_usuario
+     GROUP BY ong.id_usuario, ong.nome, foto_usuario.atualizado_em
+     ORDER BY doacoes_confirmadas DESC, ong.nome
+     LIMIT $1`,
+    [limite],
+  );
+
+  return result.rows.map((linha) => {
+    let fotoUrl = null;
+    if (linha.foto_atualizada_em) {
+      fotoUrl = urlDaFotoDaOng(linha.id_ong, linha.foto_atualizada_em);
+    }
+    return {
+      id_ong: linha.id_ong,
+      nome: linha.nome,
+      foto_url: fotoUrl,
+      doacoes_confirmadas: Number(linha.doacoes_confirmadas),
+    };
+  });
+}

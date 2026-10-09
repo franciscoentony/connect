@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Accordion, Avatar } from "@heroui/react";
+import { Accordion } from "@heroui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowDown,
@@ -11,9 +11,11 @@ import CampaignCard from "@/(components)/ui/CampaignCard";
 import Chip from "@/(components)/ui/Chip";
 import Input from "@/(components)/ui/Input";
 import Segmented from "@/(components)/ui/Segmented";
-import Modal from "@/(components)/ui/Modal";
-import { PaginationUI } from "@/(components)/ui/Pagination";
-import { exigirUsuario, lerSessao } from "@/lib/sessao";
+import { listarCampanhas } from "@/models/campanha";
+import { listarOngsEmDestaque } from "@/models/usuarios";
+
+// Endereço para perguntas (issues do GitHub do projeto), até existir um e-mail.
+const LINK_PERGUNTAS = "https://github.com/franciscoentony/connect/issues/new";
 
 // Posição das bolhas igual ao Figma (frame Início, 1920px de largura).
 // Tudo em porcentagem da área do destaque (1920 x 1024, a partir do topo da
@@ -28,61 +30,6 @@ const BOLHAS = [
   { src: "/Bolha02.png", left: "55.42%", top: "82.13%", width: "9.38%" },
 ];
 
-const CAMPANHAS = [
-  {
-    titulo: "Ajude crianças a ganharem presentes para o dia das crianças",
-    ong: "Vida Nova",
-    cidade: "Natal-RN",
-    arrecadado: 3000,
-    meta: 5000,
-    status: "Ativa",
-  },
-  {
-    titulo: "Ajude crianças a ganharem presentes para o dia das crianças",
-    ong: "Vida Nova",
-    cidade: "Natal-RN",
-    arrecadado: 3000,
-    meta: 5000,
-    status: "Pendente",
-  },
-  {
-    titulo: "Ajude crianças a ganharem presentes para o dia das crianças",
-    ong: "Vida Nova",
-    cidade: "Natal-RN",
-    arrecadado: 3000,
-    meta: 5000,
-    status: "Cancelada",
-  },
-  {
-    titulo: "Ajude crianças a ganharem presentes para o dia das crianças",
-    ong: "Vida Nova",
-    cidade: "Natal-RN",
-    arrecadado: 3000,
-    meta: 5000,
-    status: "Rascunho",
-  },
-  {
-    titulo: "Ajude crianças a ganharem presentes para o dia das crianças",
-    ong: "Vida Nova",
-    cidade: "Natal-RN",
-    arrecadado: 3000,
-    meta: 5000,
-    status: "Rascunho",
-  },
-  {
-    titulo: "Ajude crianças a ganharem presentes para o dia das crianças",
-    ong: "Vida Nova",
-    cidade: "Natal-RN",
-    arrecadado: 3000,
-    meta: 5000,
-    status: "Rascunho",
-  },
-];
-
-const pagina = [1, 2, 3, 4, 5];
-
-// "Como o sistema funciona": os 3 cards menores do grid (passos 3, 4 e 5).
-// Os passos 1 e 2 são maiores e ficam direto no JSX lá embaixo.
 const PASSOS = [
   {
     etapa: "Passo 3",
@@ -131,43 +78,6 @@ const PASSOS = [
 ];
 
 // "Maiores contribuidores": no futuro, vem da API (doadores com mais doações).
-const CONTRIBUIDORES = [
-  "Maria Souza",
-  "João Lima",
-  "Ana Costa",
-  "Pedro Alves",
-  "Júlia Rocha",
-  "Lucas Melo",
-  "Carla Dias",
-  "Rafael Nunes",
-  "Beatriz Lopes",
-  "Felipe Ramos",
-  "Larissa Pinto",
-  "Gustavo Reis",
-  "Camila Freitas",
-  "Bruno Teixeira",
-  "Mariana Castro",
-  "Thiago Moura",
-  "Fernanda Gomes",
-  "Diego Martins",
-  "Patrícia Cardoso",
-  "Rodrigo Barros",
-  "Aline Monteiro",
-  "Vinícius Araújo",
-  "Isabela Correia",
-  "Eduardo Pires",
-  "Natália Vieira",
-  "Leonardo Duarte",
-];
-
-// cores das bolinhas com as iniciais (vão se repetindo)
-const CORES_AVATAR = ["accent", "success", "warning", "danger", "default"];
-
-function iniciais(nome) {
-  const partes = nome.split(" ");
-  return partes[0][0] + partes[partes.length - 1][0];
-}
-
 const PERGUNTAS = [
   {
     pergunta: "Como eu sei que minha doação está indo ao lugar esperado?",
@@ -191,7 +101,13 @@ const PERGUNTAS = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  // dados reais: as 6 campanhas ativas mais recentes e as ONGs em destaque
+  const [campanhas, ongsEmDestaque] = await Promise.all([
+    listarCampanhas({}, { limite: 6, pagina: 1 }),
+    listarOngsEmDestaque(8),
+  ]);
+
   return (
     <main className="flex w-full flex-1 flex-col items-center pb-16">
       <section className="relative w-full max-w-[1920px] flex flex-col items-center justify-center pt-36 pb-16 h-190 md:py-0">
@@ -245,25 +161,41 @@ export default function Home() {
         <article className="flex flex-col gap-3 text-center text-white">
           <h2 className="text-4xl font-semibold">Campanhas Ativas</h2>
           <p className="text-lg">Escolha uma campanha para apoiar</p>
-          <div className="grid grid-cols-1 justify-items-center gap-4 mt-12 mb-5 lg:grid-cols-2 2xl:grid-cols-3">
-            {CAMPANHAS.map((campanha, index) => {
-              return (
-                <CampaignCard
-                  key={index}
-                  titulo={campanha.titulo}
-                  ong={campanha.ong}
-                  cidade={campanha.cidade}
-                  arrecadado={campanha.arrecadado}
-                  meta={campanha.meta}
-                  // status={campanha.status}
-                />
-              );
-            })}
-          </div>
-          <PaginationUI paginas={pagina} />
+          {campanhas.itens.length === 0 ? (
+            <p className="mt-12 text-lg">
+              Ainda não há campanhas ativas. Quando uma ONG publicar, ela
+              aparece aqui.
+            </p>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 justify-items-center gap-4 mt-12 mb-5 lg:grid-cols-2 2xl:grid-cols-3">
+                {campanhas.itens.map((campanha) => {
+                  return (
+                    <CampaignCard
+                      key={campanha.id_campanha}
+                      titulo={campanha.titulo}
+                      ong={campanha.ong_nome}
+                      arrecadado={Number(campanha.arrecadado)}
+                      meta={campanha.meta ? Number(campanha.meta) : null}
+                      imagem={campanha.capa_url}
+                      href={`/campanhas/${campanha.id_campanha}`}
+                    />
+                  );
+                })}
+              </div>
+              <div className="flex justify-center">
+                <Link href="/campanhas">
+                  <Button variante="suave">
+                    Ver todas as campanhas ({campanhas.paginacao.total})
+                  </Button>
+                </Link>
+              </div>
+            </>
+          )}
         </article>
       </section>
-      <section className="px-4 py-20 md:px-10">
+      {/* id="quem-somos": o "Sobre nós" do menu leva para cá */}
+      <section id="quem-somos" className="scroll-mt-24 px-4 py-20 md:px-10">
         <article className="flex flex-col items-center gap-15">
           <h2 className="text-4xl font-semibold">Quem somos?</h2>
           <article>
@@ -274,23 +206,23 @@ export default function Home() {
               <div className="max-w-120 flex flex-col gap-2">
                 <p className="font-semibold">
                   Desde sempre instituições de caridade ou pessoas com o
-                  objetivo de doar alguns pertencem acabam não sabendo como
+                  objetivo de doar alguns pertences acabam não sabendo como
                   chegarem a pessoa final (donatário). A Connect é uma startup
                   sem fins lucrativos que nasceu da necessidade de facilitar
                   conexão entre doadores e as pessoas carentes.
                 </p>
                 <p className="opacity-80">
-                  Através de uma plataforma inteligente e auditada, removemos as
-                  barreiras burocráticas e a falta de informação, permitindo que
-                  a ajuda certa chegue ao lugar exato no momento em que ela é
-                  necessária.
+                  No Connect, só ONGs com CNPJ criam campanhas, cada doação é
+                  confirmada pela ONG quando chega e os locais de entrega ficam
+                  à vista. Assim, a ajuda certa chega ao lugar certo, e você
+                  acompanha cada passo.
                 </p>
                 <p className="opacity-80">
                   Nossa missão é transformar a intenção de ajudar em impacto
                   real e mensurável, construindo pontes sólidas de solidariedade
                   por todo o país.
                 </p>
-                <Link href={""} className="mt-6">
+                <Link href="/campanhas" className="mt-6">
                   <Button variante="secundario">Vamos contribuir!</Button>
                 </Link>
               </div>
@@ -311,9 +243,9 @@ export default function Home() {
                 <p className="text-xs font-semibold text-primary-600">
                   Passo 1 · Para ONGs
                 </p>
-                <h2 className="text-lg font-semibold">
+                <h3 className="text-lg font-semibold">
                   Crie sua campanha em minutos
-                </h2>
+                </h3>
                 <p className="text-sm opacity-80">
                   Defina título e meta, adicione os locais de entrega e publique
                   quando estiver pronta.
@@ -347,7 +279,7 @@ export default function Home() {
                 </p>
               </div>
               <div className="flex w-full flex-1 flex-col gap-3 rounded-xl bg-neutral-50 p-4">
-                <Segmented opcoes={["Dinheiro", "Item", "Alimento"]} />
+                <Segmented opcoes={["Dinheiro", "Item"]} />
                 <Input placeholder="R$ 50,00" />
                 <Button variante="secundario" tamanho="pequeno" larguraTotal>
                   Confirmar doação
@@ -379,33 +311,52 @@ export default function Home() {
         </article>
       </section>
 
-      {/* Maiores contribuidores */}
-      <section className="w-full px-4 py-20">
-        <article className="flex flex-col items-center gap-15">
-          <div className="flex flex-col gap-3 text-center">
-            <h2 className="text-4xl font-semibold">Maiores Contribuidores</h2>
-            <p className="text-lg opacity-70">
-              Quem mais ajudou a transformar vidas pelo Connect
-            </p>
-          </div>
+      {/* ONGs em destaque: só aparece quando alguma ONG já confirmou doações */}
+      {ongsEmDestaque.length > 0 && (
+        <section className="w-full px-4 py-20">
+          <article className="flex flex-col items-center gap-15">
+            <div className="flex flex-col gap-3 text-center">
+              <h2 className="text-4xl font-semibold">ONGs em destaque</h2>
+              <p className="text-lg opacity-70">
+                As organizações com mais doações confirmadas no Connect
+              </p>
+            </div>
 
-          <div className="flex max-w-150 flex-wrap justify-center gap-y-3 -space-x-2">
-            {CONTRIBUIDORES.map((nome, index) => {
-              return (
-                <Avatar
-                  key={nome}
-                  color={CORES_AVATAR[index % CORES_AVATAR.length]}
-                  className="ring-2 ring-[var(--bg-pagina)] duration-300 ease hover:z-10 hover:scale-110"
-                >
-                  <Avatar.Fallback className="text-sm font-semibold">
-                    {iniciais(nome)}
-                  </Avatar.Fallback>
-                </Avatar>
-              );
-            })}
-          </div>
-        </article>
-      </section>
+            <ul className="grid w-full max-w-7xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {ongsEmDestaque.map((ong) => {
+                return (
+                  <li key={ong.id_ong}>
+                    <Link
+                      href={`/ongs/${ong.id_ong}`}
+                      className="flex items-center gap-4 rounded-2xl bg-neutral-0 p-4 shadow-suave duration-300 ease hover:-translate-y-0.5"
+                    >
+                      {ong.foto_url ? (
+                        <img
+                          src={ong.foto_url}
+                          alt=""
+                          className="size-14 shrink-0 rounded-full bg-neutral-200 object-cover"
+                        />
+                      ) : (
+                        <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary-100 text-xl font-semibold text-primary-600">
+                          {ong.nome[0]}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold">{ong.nome}</p>
+                        <p className="text-sm opacity-70">
+                          {ong.doacoes_confirmadas === 1
+                            ? "1 doação confirmada"
+                            : `${ong.doacoes_confirmadas} doações confirmadas`}
+                        </p>
+                      </div>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </article>
+        </section>
+      )}
 
       {/* Perguntas frequentes */}
       <section className="w-full px-4 py-20">
@@ -433,7 +384,7 @@ export default function Home() {
                       </Accordion.Trigger>
                     </Accordion.Heading>
                     <Accordion.Panel>
-                      <Accordion.Body className="pb-4 text-sm opacity-80">
+                      <Accordion.Body className="pb-4 text-sm">
                         {item.resposta}
                       </Accordion.Body>
                     </Accordion.Panel>
@@ -446,24 +397,21 @@ export default function Home() {
               <div className="flex flex-col gap-2">
                 <h3 className="text-2xl font-semibold">Tem alguma pergunta?</h3>
                 <p className="text-sm opacity-80">
-                  Sua dúvida pode ser a de mais pessoas. Envie sua pergunta e
-                  ela pode entrar nas Perguntas Frequentes.
+                  Sua dúvida pode ser a de mais pessoas. Abra uma pergunta e ela
+                  pode entrar nas Perguntas Frequentes.
                 </p>
               </div>
-              <Input rotulo="Seu nome" placeholder="Digite seu nome" />
-              <Input
-                rotulo="E-mail"
-                type="email"
-                placeholder="Digite seu e-mail"
-              />
-              <Input
-                rotulo="Dúvida"
-                placeholder="Digite sua dúvida"
-                multilinha
-              />
-              <Button larguraTotal className="mt-2">
-                Enviar pergunta
-              </Button>
+              <a
+                href={LINK_PERGUNTAS}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full"
+              >
+                <Button larguraTotal>Abrir uma pergunta</Button>
+              </a>
+              <p className="text-xs opacity-70">
+                Você vai para a página do projeto no GitHub.
+              </p>
             </div>
           </div>
         </article>
