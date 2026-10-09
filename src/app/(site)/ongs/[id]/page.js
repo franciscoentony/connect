@@ -1,9 +1,8 @@
 import { notFound } from "next/navigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import Button from "@/(components)/ui/Button";
 import CampaignCard from "@/(components)/ui/CampaignCard";
 import PaginacaoLinks from "@/(components)/ui/PaginacaoLinks";
+import BuscaCampanhas from "@/(components)/ui/BuscaCampanhas";
 import { buscarOngPublica } from "@/models/usuarios.js";
 import { listarCampanhas } from "@/models/campanha.js";
 import { contarContribuidoresDaOng } from "@/models/doacao.js";
@@ -158,20 +157,7 @@ export default async function PaginaDaOng({ params, searchParams }) {
             </div>
 
             <div className="flex flex-col items-end gap-2">
-              {/* formulário GET: ao apertar Enter, vai para ?busca=texto */}
-              <form
-                action={`/ongs/${id}`}
-                className="flex h-12 w-80 items-center gap-3 rounded-xl bg-neutral-100 px-4 text-sm"
-              >
-                <FontAwesomeIcon icon={faMagnifyingGlass} />
-                <input
-                  name="busca"
-                  defaultValue={textoBuscado}
-                  placeholder="Buscar campanha"
-                  aria-label="Buscar campanha"
-                  className="w-full bg-transparent text-base outline-none placeholder:text-neutral-700"
-                />
-              </form>
+              <BuscaCampanhas caminho={`/ongs/${id}`} valor={textoBuscado} />
               <p className="text-sm opacity-70">
                 {total === 1 ? "1 campanha" : `${total} campanhas`}
               </p>
