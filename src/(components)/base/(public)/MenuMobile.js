@@ -2,15 +2,20 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
   faXmark,
   faArrowRightToBracket,
+  faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
 import Logo from "@/(components)/ui/Logo";
 import ThemeToggle from "@/(components)/ui/ThemeToggle";
+import {
+  opcoesDaConta,
+  sairDaConta,
+} from "@/(components)/base/(public)/opcoesDaConta";
 
 // Menu do topo no celular e tablet (Figma: "Header Mobile").
 // Barra com logo + botão ☰; o botão abre um painel com os links.
@@ -21,6 +26,7 @@ import ThemeToggle from "@/(components)/ui/ThemeToggle";
 export default function MenuMobile({ links, usuario }) {
   const [aberto, setAberto] = useState(false);
   const caminho = usePathname();
+  const router = useRouter();
 
   // fecha o painel quando a página muda (ex.: tocou num link)
   useEffect(() => {
@@ -97,6 +103,43 @@ export default function MenuMobile({ links, usuario }) {
               );
             })}
           </ul>
+
+          {/* logado: as mesmas opções do menu "Olá, {nome}!" do computador */}
+          {usuario && (
+            <ul className="flex flex-col border-t border-neutral-200 pt-4">
+              {/* sem repetir o que já está nos links acima (ex.: Minhas doações) */}
+              {opcoesDaConta(usuario.tipo)
+                .filter(
+                  (opcao) => !links.some(([, href]) => href === opcao.href),
+                )
+                .map((opcao) => {
+                  return (
+                    <li key={opcao.chave}>
+                      <Link
+                        href={opcao.href}
+                        className="flex min-h-12 items-center gap-3 rounded-xl px-3 font-medium text-neutral-700 duration-300 ease hover:bg-neutral-100"
+                      >
+                        <FontAwesomeIcon
+                          icon={opcao.icone}
+                          className="w-4 text-primary-600"
+                        />
+                        {opcao.texto}
+                      </Link>
+                    </li>
+                  );
+                })}
+              <li>
+                <button
+                  type="button"
+                  onClick={() => sairDaConta(router)}
+                  className="flex min-h-12 w-full items-center gap-3 rounded-xl px-3 font-medium text-danger-500 cursor-pointer duration-300 ease hover:bg-danger-100"
+                >
+                  <FontAwesomeIcon icon={faRightFromBracket} className="w-4" />
+                  Sair da conta
+                </button>
+              </li>
+            </ul>
+          )}
 
           {/* visitante: as duas ações do menu do computador, em largura total */}
           {!usuario && (

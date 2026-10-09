@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/(components)/ui/Button";
 import Input from "@/(components)/ui/Input";
@@ -10,11 +10,19 @@ import Modal from "@/(components)/ui/Modal";
 // Cria a campanha em POST /api/v1/campanhas (ela nasce como rascunho)
 // e atualiza a página para a campanha aparecer na tabela.
 //
-// Uso: <NovaCampanha />
+// Com "abrir", o modal já começa aberto: é o que acontece quando a ONG
+// escolhe "Nova campanha" no menu da conta (o link é /dashboard?nova=1).
+//
+// Uso: <NovaCampanha />  ou  <NovaCampanha abrir />
 
-export default function NovaCampanha() {
+export default function NovaCampanha({ abrir = false }) {
   const router = useRouter();
-  const [aberto, setAberto] = useState(false);
+  const [aberto, setAberto] = useState(abrir);
+
+  // se já estava no dashboard e escolheu "Nova campanha" de novo
+  useEffect(() => {
+    if (abrir) setAberto(true);
+  }, [abrir]);
   const [titulo, setTitulo] = useState("");
   const [meta, setMeta] = useState("");
   const [erro, setErro] = useState("");
@@ -23,6 +31,8 @@ export default function NovaCampanha() {
   function fechar() {
     setAberto(false);
     setErro("");
+    // tira o ?nova=1 do endereço, para o modal não reabrir ao atualizar
+    if (abrir) router.replace("/dashboard");
   }
 
   async function criar(evento) {

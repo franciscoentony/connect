@@ -3,33 +3,44 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMagnifyingGlass,
   faArrowRightToBracket,
-  faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
 import Logo from "@/(components)/ui/Logo";
 import ThemeToggle from "@/(components)/ui/ThemeToggle";
 import MenuMobile from "@/(components)/base/(public)/MenuMobile";
+import MenuUsuario from "@/(components)/base/(public)/MenuUsuario";
 
 // Menu do topo das telas públicas e do doador.
 // Sem "usuario": mostra Login + Vamos começar (visitante).
-// Com "usuario": mostra avatar e nome (logado).
+// Com "usuario": mostra avatar e nome, que abrem o menu da conta (logado).
 // No computador (lg para cima) é a pílula; abaixo disso, o MenuMobile.
 //
 // Uso: <Header />  ou  <Header usuario={{ nome: "Entony", foto_url: "/api/v1/perfil/foto?v=1" }} />
 
 export default function Header({ usuario }) {
-  const links = usuario
-    ? [
-        ["Início", "/"],
-        ["Campanhas", "/campanhas"],
-        ["Minhas doações", "/minhas-doacoes"],
-        ["Contato", "/contato"],
-      ]
-    : [
-        ["Início", "/"],
-        ["Campanhas", "/campanhas"],
-        ["Sobre nós", "/sobre"],
-        ["Contato", "/contato"],
-      ];
+  // o 3º link muda conforme quem está logado
+  let links;
+  if (usuario?.tipo === "ong") {
+    links = [
+      ["Início", "/"],
+      ["Campanhas", "/campanhas"],
+      ["Painel", "/dashboard"],
+      ["Contato", "/contato"],
+    ];
+  } else if (usuario) {
+    links = [
+      ["Início", "/"],
+      ["Campanhas", "/campanhas"],
+      ["Minhas doações", "/minhas-doacoes"],
+      ["Contato", "/contato"],
+    ];
+  } else {
+    links = [
+      ["Início", "/"],
+      ["Campanhas", "/campanhas"],
+      ["Sobre nós", "/sobre"],
+      ["Contato", "/contato"],
+    ];
+  }
 
   return (
     <header className="fixed z-99 w-full duration-300 ease lg:px-4 lg:pt-8">
@@ -64,20 +75,7 @@ export default function Header({ usuario }) {
         <div className="flex items-center justify-self-end gap-6">
           <ThemeToggle />
           {usuario ? (
-            <button className="flex items-center gap-3 pr-2 cursor-pointer">
-              <img
-                src={usuario.foto_url || "/identity/co.png"}
-                alt=""
-                className="size-11 rounded-full bg-neutral-200 object-cover"
-              />
-              <span className="font-semibold text-neutral-900">
-                Olá, {usuario.nome}!
-              </span>
-              <FontAwesomeIcon
-                icon={faChevronDown}
-                className="text-sm text-neutral-700"
-              />
-            </button>
+            <MenuUsuario usuario={usuario} />
           ) : (
             <>
               <Link

@@ -1,9 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faMagnifyingGlass,
-  faChevronDown,
-} from "@fortawesome/free-solid-svg-icons";
+import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import ThemeToggle from "@/(components)/ui/ThemeToggle";
+import MenuUsuario from "@/(components)/base/(public)/MenuUsuario";
 
 // Barra do topo do painel da ONG: busca + usuário.
 //
@@ -23,22 +21,7 @@ export default function Topbar({ usuario }) {
 
       <div className="flex shrink-0 items-center gap-3 lg:gap-6">
         <ThemeToggle />
-        {usuario && (
-          <button className="flex items-center gap-3 cursor-pointer">
-            <img
-              src={usuario.foto_url || "/identity/co.png"}
-              alt=""
-              className="size-11 rounded-full bg-neutral-200 object-cover"
-            />
-            {/* no celular fica só a foto, para caber a busca */}
-            <span className="hidden font-semibold text-neutral-900 md:inline">
-              Olá, {usuario.nome}!
-            </span>
-            <span className="hidden text-sm text-neutral-700 md:inline">
-              <FontAwesomeIcon icon={faChevronDown} />
-            </span>
-          </button>
-        )}
+        {usuario && <MenuUsuario usuario={usuario} nomeNoCelular={false} />}
       </div>
     </div>
   );
