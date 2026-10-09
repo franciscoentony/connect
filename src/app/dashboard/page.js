@@ -33,7 +33,8 @@ function reais(valor) {
   });
 }
 
-export default async function Dashboard() {
+export default async function Dashboard({ searchParams }) {
+  const { nova } = await searchParams;
   const sessao = await lerSessao();
   const [usuario, resumo, campanhas, pendentes] = await Promise.all([
     buscarUsuarioPorId(sessao.id_usuario),
@@ -76,7 +77,7 @@ export default async function Dashboard() {
           <h1 className="text-4xl font-semibold">Olá, {usuario.nome}!</h1>
           <p className="text-lg opacity-70">Suas campanhas</p>
         </div>
-        <NovaCampanha />
+        <NovaCampanha abrir={nova === "1"} />
       </section>
 
       {/* resumo */}

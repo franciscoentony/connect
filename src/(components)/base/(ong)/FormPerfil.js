@@ -6,8 +6,9 @@ import Button from "@/(components)/ui/Button";
 import Input from "@/(components)/ui/Input";
 import { formatarCnpj } from "@/lib/formatar";
 
-// Formulário "Meu perfil": nome, descrição, site e contato podem mudar
-// (os três últimos aparecem na página pública da ONG).
+// Formulário "Meu perfil" (ONG e doador).
+// - todos: o nome pode mudar;
+// - só ONG: descrição, site e contato (aparecem na página pública da ONG).
 // E-mail e CNPJ identificam a conta, então aparecem travados.
 // Salva em PATCH /api/v1/perfil.
 //
@@ -15,6 +16,7 @@ import { formatarCnpj } from "@/lib/formatar";
 
 export default function FormPerfil({ usuario }) {
   const router = useRouter();
+  const ehOng = usuario.tipo === "ong";
   const [nome, setNome] = useState(usuario.nome);
   // "?? """: campo que a ONG ainda não preencheu vem null; o Input precisa de texto
   const [descricao, setDescricao] = useState(usuario.descricao ?? "");
@@ -34,7 +36,10 @@ export default function FormPerfil({ usuario }) {
       const resposta = await fetch("/api/v1/perfil", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nome, descricao, site, contato }),
+        // o doador só tem nome; a ONG tem também descrição, site e contato
+        body: JSON.stringify(
+          ehOng ? { nome, descricao, site, contato } : { nome },
+        ),
       });
       const dados = await resposta.json();
 
@@ -43,7 +48,7 @@ export default function FormPerfil({ usuario }) {
         return;
       }
       // a API pode ajustar o site (ex.: "amigos.org" vira "https://amigos.org")
-      setSite(dados.site ?? "");
+      if (ehOng) setSite(dados.site ?? "");
       setMensagem("Perfil atualizado!");
       router.refresh(); // atualiza também o nome na barra do topo
     } catch {
@@ -59,27 +64,31 @@ export default function FormPerfil({ usuario }) {
       className="flex w-full max-w-140 flex-col gap-6 rounded-2xl bg-neutral-0 p-6 shadow-suave"
     >
       <Input rotulo="Nome" value={nome} onChange={setNome} />
-      <Input
-        rotulo="Descrição"
-        placeholder="Conte o que a sua ONG faz"
-        dica="Aparece na sua página pública · até 500 caracteres"
-        multilinha
-        value={descricao}
-        onChange={setDescricao}
-      />
-      <Input
-        rotulo="Site"
-        placeholder="suaong.org.br"
-        value={site}
-        onChange={setSite}
-      />
-      <Input
-        rotulo="Contato público"
-        placeholder="Telefone ou e-mail"
-        dica="Usado no botão “Entrar em contato” da sua página"
-        value={contato}
-        onChange={setContato}
-      />
+      {ehOng && (
+        <>
+          <Input
+            rotulo="Descrição"
+            placeholder="Conte o que a sua ONG faz"
+            dica="Aparece na sua página pública · até 500 caracteres"
+            multilinha
+            value={descricao}
+            onChange={setDescricao}
+          />
+          <Input
+            rotulo="Site"
+            placeholder="suaong.org.br"
+            value={site}
+            onChange={setSite}
+          />
+          <Input
+            rotulo="Contato público"
+            placeholder="Telefone ou e-mail"
+            dica="Usado no botão “Entrar em contato” da sua página"
+            value={contato}
+            onChange={setContato}
+          />
+        </>
+      )}
       <Input
         rotulo="E-mail"
         value={usuario.email}
