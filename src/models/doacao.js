@@ -117,6 +117,64 @@ export async function listarDoacoesDoDoador(idDoador, { limite, pagina }) {
   return respostaPaginada(result.rows, total, { limite, pagina });
 }
 
+// ---------- página "Minhas doações" do doador ----------
+
+// Doações do doador que ainda esperam a ONG confirmar (as mais novas primeiro).
+// Sem paginação: são poucas por vez, e o doador precisa ver todas.
+export async function listarPendentesDoDoador(idDoador) {
+  const result = await query(
+    `${SELECT_DOACAO}
+     WHERE doacao.id_doador = $1 AND doacao.status = 'pendente'
+     ORDER BY doacao.data DESC, doacao.id_doacao DESC
+     LIMIT 50`,
+    [idDoador],
+  );
+  return result.rows;
+}
+
+// Histórico do doador: doações já resolvidas (confirmadas ou canceladas).
+export async function listarHistoricoDoDoador(idDoador, { limite, pagina }) {
+  const contagem = await query(
+    `SELECT COUNT(*) AS total FROM doacao
+     WHERE id_doador = $1 AND status <> 'pendente'`,
+    [idDoador],
+  );
+  const total = Number(contagem.rows[0].total);
+
+  const result = await query(
+    `${SELECT_DOACAO}
+     WHERE doacao.id_doador = $1 AND doacao.status <> 'pendente'
+     ORDER BY doacao.data DESC, doacao.id_doacao DESC
+     LIMIT $2 OFFSET $3`,
+    [idDoador, limite, (pagina - 1) * limite],
+  );
+  return respostaPaginada(result.rows, total, { limite, pagina });
+}
+
+// Números do topo de "Minhas doações":
+// - quanto o doador já doou em dinheiro com confirmação da ONG;
+// - quantas doações foram confirmadas e quantas esperam a ONG.
+// O FILTER conta/soma só as linhas que passam na condição.
+export async function resumoDoDoador(idDoador) {
+  const result = await query(
+    `SELECT
+       COALESCE(SUM(valor) FILTER (
+         WHERE status = 'confirmada' AND tipo = 'dinheiro'
+       ), 0) AS confirmado_em_dinheiro,
+       COUNT(*) FILTER (WHERE status = 'confirmada') AS confirmadas,
+       COUNT(*) FILTER (WHERE status = 'pendente') AS pendentes
+     FROM doacao
+     WHERE id_doador = $1`,
+    [idDoador],
+  );
+  const linha = result.rows[0];
+  return {
+    confirmadoEmDinheiro: Number(linha.confirmado_em_dinheiro),
+    confirmadas: Number(linha.confirmadas),
+    pendentes: Number(linha.pendentes),
+  };
+}
+
 export async function listarDoacoesDaCampanha(
   idCampanha,
   idOng,
