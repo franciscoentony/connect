@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChartPie,
@@ -14,6 +15,7 @@ import {
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import Logo from "@/(components)/ui/Logo";
+import { sairDaConta } from "@/(components)/base/(public)/opcoesDaConta";
 
 // Menu lateral do painel da ONG.
 // O item ativo é descoberto sozinho pela URL (não precisa passar nada).
@@ -47,7 +49,6 @@ const ITENS = [
 
 export default function Sidebar() {
   const caminho = usePathname(); // ex.: "/dashboard/campanhas/12"
-  const router = useRouter();
   const [aberto, setAberto] = useState(false); // menu do celular
 
   // fecha o menu do celular quando a página muda
@@ -60,12 +61,6 @@ export default function Sidebar() {
   function estaAtivo(href) {
     if (href === "/dashboard") return caminho === "/dashboard";
     return caminho.startsWith(href);
-  }
-
-  async function sair() {
-    await fetch("/api/v1/sessao", { method: "DELETE" }); // apaga o cookie
-    router.push("/");
-    router.refresh();
   }
 
   // itens do menu: os mesmos no computador e no celular
@@ -94,7 +89,7 @@ export default function Sidebar() {
 
   const botaoSair = (
     <button
-      onClick={sair}
+      onClick={sairDaConta}
       className="flex min-h-12 items-center gap-4 rounded-xl bg-danger-100 px-4 py-3.5 font-medium text-danger-500 cursor-pointer duration-300 ease hover:brightness-95"
     >
       <FontAwesomeIcon icon={faRightFromBracket} className="w-5" />
@@ -128,12 +123,21 @@ export default function Sidebar() {
             <FontAwesomeIcon icon={aberto ? faXmark : faBars} />
           </button>
         </div>
-        {aberto && (
-          <div id="menu-painel" className="flex flex-col gap-6 px-2 pb-4">
-            {itens}
-            {botaoSair}
-          </div>
-        )}
+        <AnimatePresence>
+          {aberto && (
+            <motion.div
+              id="menu-painel"
+              className="flex flex-col gap-6 px-2 pb-4"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {itens}
+              {botaoSair}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </>
   );

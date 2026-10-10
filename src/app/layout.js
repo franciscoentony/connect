@@ -1,5 +1,6 @@
 import { Manrope } from "next/font/google";
 import "./globals.css";
+import MovimentoAcessivel from "@/(components)/ui/MovimentoAcessivel";
 
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
@@ -24,7 +25,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="pt-br" className={`${manrope.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="min-h-full flex flex-col font-sans">
+        <MovimentoAcessivel>{children}</MovimentoAcessivel>
+      </body>
     </html>
   );
 }

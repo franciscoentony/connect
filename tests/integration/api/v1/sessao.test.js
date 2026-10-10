@@ -114,4 +114,19 @@ describe("DELETE /api/v1/sessao (logout)", () => {
     expect(r.status).toBe(204);
     expect(r.headers.getSetCookie().join(";")).toMatch(/sessao=;/);
   });
+
+  test("apaga o cookie com os mesmos atributos do login", async () => {
+    // Se o cookie de "apagar" vier com atributos diferentes dos do login,
+    // alguns navegadores (como o Safari) ignoram e a pessoa continua logada.
+    const r = await api("/api/v1/sessao", {
+      metodo: "DELETE",
+      cookie: doador.cookie,
+    });
+    const apagar = r.headers.getSetCookie().join(";");
+
+    expect(apagar).toMatch(/Max-Age=0/i);
+    expect(apagar).toMatch(/Path=\//i);
+    expect(apagar).toMatch(/HttpOnly/i);
+    expect(apagar).toMatch(/SameSite=lax/i);
+  });
 });
