@@ -29,7 +29,7 @@ export default function MenuUsuario({ usuario, nomeNoCelular = true }) {
   // "chave" é o id do item escolhido no menu
   function aoEscolher(chave) {
     if (chave === "sair") {
-      sairDaConta(router);
+      sairDaConta();
       return;
     }
     const opcao = opcoes.find((item) => item.chave === chave);

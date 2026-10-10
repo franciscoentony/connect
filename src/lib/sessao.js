@@ -12,6 +12,18 @@ import { ErroDeNegocio } from "@/lib/erros.js";
 const NOME_COOKIE = "sessao";
 const SETE_DIAS_EM_SEGUNDOS = 60 * 60 * 24 * 7;
 
+// Atributos do cookie, iguais no login e no logout.
+// Para apagar um cookie, o navegador exige que ele venha com os MESMOS
+// atributos com que foi criado (principalmente Secure e Path). Se o logout
+// mandasse um cookie diferente, alguns navegadores (como o Safari) ignoram
+// e a pessoa continua logada.
+const OPCOES_DO_COOKIE = {
+  httpOnly: true, // o JavaScript do navegador não consegue ler o cookie
+  sameSite: "lax", // não é enviado em requisições vindas de outros sites
+  secure: process.env.NODE_ENV === "production", // só HTTPS em produção
+  path: "/",
+};
+
 function chaveSecreta() {
   const segredo = process.env.JWT_SECRET;
   if (!segredo || segredo.length < 32) {
@@ -33,17 +45,15 @@ export async function iniciarSessao(usuario) {
 
   const cookiesDaResposta = await cookies();
   cookiesDaResposta.set(NOME_COOKIE, token, {
-    httpOnly: true, // o JavaScript do navegador não consegue ler o cookie
-    sameSite: "lax", // não é enviado em requisições vindas de outros sites
-    secure: process.env.NODE_ENV === "production", // só HTTPS em produção
-    path: "/",
+    ...OPCOES_DO_COOKIE,
     maxAge: SETE_DIAS_EM_SEGUNDOS,
   });
 }
 
 export async function encerrarSessao() {
   const cookiesDaResposta = await cookies();
-  cookiesDaResposta.delete(NOME_COOKIE);
+  // valor vazio + maxAge 0 = "apague agora", com os mesmos atributos do login
+  cookiesDaResposta.set(NOME_COOKIE, "", { ...OPCOES_DO_COOKIE, maxAge: 0 });
 }
 
 // Devolve { id_usuario, tipo } de quem está logado, ou null.

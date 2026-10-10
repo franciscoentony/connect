@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
@@ -26,7 +26,6 @@ import {
 export default function MenuMobile({ links, usuario }) {
   const [aberto, setAberto] = useState(false);
   const caminho = usePathname();
-  const router = useRouter();
 
   // fecha o painel quando a página muda (ex.: tocou num link)
   useEffect(() => {
@@ -131,7 +130,7 @@ export default function MenuMobile({ links, usuario }) {
               <li>
                 <button
                   type="button"
-                  onClick={() => sairDaConta(router)}
+                  onClick={sairDaConta}
                   className="flex min-h-12 w-full items-center gap-3 rounded-xl px-3 font-medium text-danger-500 cursor-pointer duration-300 ease hover:bg-danger-100"
                 >
                   <FontAwesomeIcon icon={faRightFromBracket} className="w-4" />
