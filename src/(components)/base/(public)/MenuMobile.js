@@ -12,6 +12,7 @@ import {
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
 import Logo from "@/(components)/ui/Logo";
+import { FundoQueExpande, SobeComQuique } from "@/(components)/ui/Entrada";
 import ThemeToggle from "@/(components)/ui/ThemeToggle";
 import {
   opcoesDaConta,
@@ -45,13 +46,16 @@ export default function MenuMobile({ links, usuario }) {
 
   return (
     <div className="lg:hidden">
-      {/* mesmo vidro fosco do menu do computador */}
-      <div className="flex h-16 items-center justify-between bg-neutral-0/70 shadow-vidro backdrop-blur-xl backdrop-saturate-150 px-4">
-        <Link href="/" aria-label="Início">
-          <Logo largura={120} />
-        </Link>
+      {/* mesmo vidro fosco e a mesma entrada do menu do computador */}
+      <div className="relative isolate flex h-16 items-center justify-between px-4">
+        <FundoQueExpande className="bg-neutral-0/70 shadow-vidro backdrop-blur-xl backdrop-saturate-150" />
+        <SobeComQuique atraso={0.7}>
+          <Link href="/" aria-label="Início">
+            <Logo largura={120} />
+          </Link>
+        </SobeComQuique>
 
-        <div className="flex items-center gap-1">
+        <SobeComQuique atraso={0.85} className="flex items-center gap-1">
           <ThemeToggle />
           <button
             type="button"
@@ -63,7 +67,7 @@ export default function MenuMobile({ links, usuario }) {
           >
             <FontAwesomeIcon icon={aberto ? faXmark : faBars} />
           </button>
-        </div>
+        </SobeComQuique>
       </div>
 
       {/* a gaveta desliza um pouco para baixo ao abrir e some ao fechar */}
@@ -73,7 +77,7 @@ export default function MenuMobile({ links, usuario }) {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             id="menu-mobile"
             aria-label="Menu principal"
             className="flex flex-col gap-6 rounded-b-3xl bg-neutral-0 px-4 pt-2 pb-6 shadow-suave"

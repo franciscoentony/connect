@@ -20,7 +20,10 @@ import {
 // - a cada quadro, giramos esse vetor um pouquinho e voltamos para pixels.
 //   Como a área é mais larga que alta, o caminho vira uma elipse.
 //
-// Uso: <BolhasDoTopo bolhas={[{ src, left: "4.74%", top: "11.62%", width: "20.47%" }]} />
+// "atrasoInicial": segundos até a primeira bolha aparecer (na home, depois do
+// título, do subtítulo e dos botões).
+//
+// Uso: <BolhasDoTopo bolhas={[{ src, left: "4.74%", top: "11.62%", width: "20.47%" }]} atrasoInicial={1.2} />
 
 const SEGUNDOS_POR_VOLTA = 80; // devagar: é um movimento de fundo
 const CENTRO = { x: 0.5, y: 0.52 }; // centro do título, em frações da área
@@ -28,7 +31,7 @@ const CENTRO = { x: 0.5, y: 0.52 }; // centro do título, em frações da área
 // cima do título
 const RAIO_MINIMO = 0.42;
 
-export default function BolhasDoTopo({ bolhas }) {
+export default function BolhasDoTopo({ bolhas, atrasoInicial = 0.15 }) {
   const area = useRef(null);
   const visivel = useInView(area); // a órbita pausa quando o topo sai da tela
   const reduzirMovimento = useReducedMotion();
@@ -71,6 +74,7 @@ export default function BolhasDoTopo({ bolhas }) {
             altura={altura}
             angulo={angulo}
             reduzirMovimento={reduzirMovimento}
+            atrasoInicial={atrasoInicial}
           />
         );
       })}
@@ -78,7 +82,15 @@ export default function BolhasDoTopo({ bolhas }) {
   );
 }
 
-function Bolha({ bolha, indice, largura, altura, angulo, reduzirMovimento }) {
+function Bolha({
+  bolha,
+  indice,
+  largura,
+  altura,
+  angulo,
+  reduzirMovimento,
+  atrasoInicial,
+}) {
   // posição e tamanho do Figma, em frações (ex.: "20.47%" vira 0.2047)
   const esquerda = parseFloat(bolha.left) / 100;
   const topo = parseFloat(bolha.top) / 100;
@@ -139,8 +151,8 @@ function Bolha({ bolha, indice, largura, altura, angulo, reduzirMovimento }) {
             : {
                 type: "spring",
                 bounce: 0.45,
-                duration: 0.8,
-                delay: 0.15 + indice * 0.12,
+                duration: 1.2,
+                delay: atrasoInicial + indice * 0.25,
               }
         }
       />

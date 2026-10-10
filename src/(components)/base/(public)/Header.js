@@ -8,6 +8,7 @@ import Logo from "@/(components)/ui/Logo";
 import ThemeToggle from "@/(components)/ui/ThemeToggle";
 import MenuMobile from "@/(components)/base/(public)/MenuMobile";
 import MenuUsuario from "@/(components)/base/(public)/MenuUsuario";
+import { FundoQueExpande, SobeComQuique } from "@/(components)/ui/Entrada";
 
 // Menu do topo das telas públicas e do doador.
 // Sem "usuario": mostra Login + Vamos começar (visitante).
@@ -43,36 +44,49 @@ export default function Header({ usuario }) {
     <header className="fixed z-99 w-full duration-300 ease lg:px-4 lg:pt-8">
       <MenuMobile links={links} usuario={usuario} />
 
-      {/* vidro fosco: fundo translúcido que desfoca o que passa por trás */}
-      <nav className="mx-auto hidden max-w-7xl grid-cols-3 lg:grid items-center rounded-full bg-neutral-0/70 shadow-vidro backdrop-blur-xl backdrop-saturate-150 duration-300 ease py-2 pl-9 pr-4">
-        <Link href="/" className="justify-self-start">
-          <Logo />
-        </Link>
+      {/* entrada: o fundo de vidro se expande do centro e depois os itens
+          sobem com quique, um depois do outro */}
+      <nav className="relative isolate mx-auto hidden max-w-7xl grid-cols-3 lg:grid items-center duration-300 ease py-2 pl-9 pr-4">
+        {/* vidro fosco: fundo translúcido que desfoca o que passa por trás */}
+        <FundoQueExpande className="rounded-full bg-neutral-0/70 shadow-vidro backdrop-blur-xl backdrop-saturate-150" />
+
+        <SobeComQuique atraso={0.7} className="justify-self-start">
+          <Link href="/">
+            <Logo />
+          </Link>
+        </SobeComQuique>
 
         <ul className="flex items-center justify-center gap-10 text-base font-medium text-neutral-700">
-          {links.map(([texto, href]) => (
+          {links.map(([texto, href], indice) => (
             <li key={texto}>
-              <Link
-                href={href}
-                className="whitespace-nowrap hover:text-neutral-900"
-              >
-                {texto}
-              </Link>
+              <SobeComQuique atraso={0.85 + indice * 0.12}>
+                <Link
+                  href={href}
+                  className="whitespace-nowrap hover:text-neutral-900"
+                >
+                  {texto}
+                </Link>
+              </SobeComQuique>
             </li>
           ))}
           <li>
             {/* a busca de campanhas fica na página /campanhas */}
-            <Link
-              href="/campanhas"
-              aria-label="Buscar campanhas"
-              className="hover:text-neutral-900"
-            >
-              <FontAwesomeIcon icon={faMagnifyingGlass} />
-            </Link>
+            <SobeComQuique atraso={1.35}>
+              <Link
+                href="/campanhas"
+                aria-label="Buscar campanhas"
+                className="hover:text-neutral-900"
+              >
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
+              </Link>
+            </SobeComQuique>
           </li>
         </ul>
 
-        <div className="flex items-center justify-self-end gap-6">
+        <SobeComQuique
+          atraso={1.5}
+          className="flex items-center justify-self-end gap-6"
+        >
           <ThemeToggle />
           {usuario ? (
             <MenuUsuario usuario={usuario} />
@@ -93,7 +107,7 @@ export default function Header({ usuario }) {
               </Link>
             </>
           )}
-        </div>
+        </SobeComQuique>
       </nav>
     </header>
   );
