@@ -7,6 +7,7 @@ import {
   faHandHoldingHeart,
 } from "@fortawesome/free-solid-svg-icons";
 import Button from "@/(components)/ui/Button";
+import BolhasDoTopo from "@/(components)/base/(public)/BolhasDoTopo";
 import CampaignCard from "@/(components)/ui/CampaignCard";
 import Chip from "@/(components)/ui/Chip";
 import Input from "@/(components)/ui/Input";
@@ -111,22 +112,11 @@ export default async function Home() {
   return (
     <main className="flex w-full flex-1 flex-col items-center pb-16">
       <section className="relative w-full max-w-[1920px] flex flex-col items-center justify-center pt-36 pb-16 h-190 md:py-0">
-        {/* bolhas: escondidas no celular */}
-
-        {BOLHAS.map((bolha) => (
-          <img
-            key={bolha.src}
-            src={bolha.src}
-            alt=""
-            aria-hidden="true"
-            draggable="false"
-            className="pointer-events-none absolute hidden select-none md:block"
-            style={{ left: bolha.left, top: bolha.top, width: bolha.width }}
-          />
-        ))}
+        {/* bolhas: aparecem com "pop" e orbitam o título (escondidas no celular) */}
+        <BolhasDoTopo bolhas={BOLHAS} />
 
         {/* texto central: no Figma o título começa a 38,9% da altura */}
-        <div className="flex flex-col items-center gap-5 px-4 text-center md:pt-25 md:w-full">
+        <div className="relative z-10 flex flex-col items-center gap-5 px-4 text-center md:pt-25 md:w-full">
           <h1 className="max-w-[1200px] text-4xl font-bold leading-tight md:text-5xl">
             Conectando com Responsabilidade <br className="hidden md:block" />e
             Transformando Vidas.

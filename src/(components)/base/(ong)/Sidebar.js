@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -128,12 +129,21 @@ export default function Sidebar() {
             <FontAwesomeIcon icon={aberto ? faXmark : faBars} />
           </button>
         </div>
-        {aberto && (
-          <div id="menu-painel" className="flex flex-col gap-6 px-2 pb-4">
-            {itens}
-            {botaoSair}
-          </div>
-        )}
+        <AnimatePresence>
+          {aberto && (
+            <motion.div
+              id="menu-painel"
+              className="flex flex-col gap-6 px-2 pb-4"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {itens}
+              {botaoSair}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </>
   );
