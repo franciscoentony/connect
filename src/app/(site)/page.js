@@ -112,7 +112,11 @@ export default async function Home() {
 
   return (
     <main className="flex w-full flex-1 flex-col items-center pb-16">
-      <section className="relative w-full max-w-[1920px] flex flex-col items-center justify-center pt-36 pb-16 h-190 md:py-0">
+      {/* overflow-hidden: com o parallax e a órbita, as bolhas e o texto se
+          movem; o topo recorta o que passar dos limites dele, para nada
+          invadir a seção de campanhas. mask-b-from-90%: nos últimos 10% da
+          altura o conteúdo vai sumindo, em vez de ser cortado numa linha reta */}
+      <section className="relative w-full max-w-[1920px] overflow-hidden mask-b-from-90% flex flex-col items-center justify-center pt-36 pb-16 h-190 md:py-0">
         {/* bolhas: aparecem com "pop" e orbitam o título (escondidas no celular) */}
         <Parallax velocidade={0.4} className="absolute inset-0">
           <BolhasDoTopo bolhas={BOLHAS} atrasoInicial={1.7} />
