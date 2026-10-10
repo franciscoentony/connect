@@ -23,7 +23,8 @@ const DESACELERAR = [0.16, 1, 0.3, 1];
 
 // Duração de cada tipo de animação, em segundos.
 // Para deixar tudo mais rápido ou mais lento, mude aqui.
-// (Os ATRASOS de cada elemento ficam onde ele é usado: Header e home.)
+// (Os ATRASOS de cada elemento ficam onde ele é usado: Header e home.
+// O menu e o topo da home animam ao mesmo tempo, cada um no seu ritmo.)
 export const DURACAO = {
   fundo: 1.1, // fundo do menu se expandindo
   quique: 1.0, // itens do menu subindo com quique

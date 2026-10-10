@@ -115,7 +115,7 @@ export default async function Home() {
       <section className="relative w-full max-w-[1920px] flex flex-col items-center justify-center pt-36 pb-16 h-190 md:py-0">
         {/* bolhas: aparecem com "pop" e orbitam o título (escondidas no celular) */}
         <Parallax velocidade={0.4} className="absolute inset-0">
-          <BolhasDoTopo bolhas={BOLHAS} atrasoInicial={2.9} />
+          <BolhasDoTopo bolhas={BOLHAS} atrasoInicial={1.7} />
         </Parallax>
 
         {/* texto central: no Figma o título começa a 38,9% da altura */}
@@ -124,20 +124,20 @@ export default async function Home() {
           esmaecer
           className="relative z-10 flex flex-col items-center gap-5 px-4 text-center md:pt-25 md:w-full"
         >
-          <Revelar atraso={1.4}>
+          <Revelar atraso={0.2}>
             <h1 className="max-w-[1200px] text-4xl font-bold leading-tight md:text-5xl">
               Conectando com Responsabilidade <br className="hidden md:block" />
               e Transformando Vidas.
             </h1>
           </Revelar>
-          <Revelar atraso={1.8}>
+          <Revelar atraso={0.6}>
             <p className="max-w-[600px] text-xl text-neutral-700">
               O Connect é um sistema de gerenciamento de doações que conecta
               doadores a campanhas de arrecadação, com ONGs servindo como ponte.
             </p>
           </Revelar>
           <Revelar
-            atraso={2.2}
+            atraso={1.0}
             className="mt-5 flex flex-wrap justify-center gap-4"
           >
             <Link href="/campanhas">
