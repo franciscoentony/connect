@@ -37,6 +37,9 @@
      Fica escuro nos dois temas, porque os verdes são claros nos dois:
      texto branco sobre eles teria contraste de só 1,9:1. */
   --texto-sobre-verde: #11181c;
+
+  /* Reflexo de luz na borda de cima do menu de vidro (veja --shadow-vidro) */
+  --vidro-brilho: rgb(255 255 255 / 0.9);
 }
 
 .dark {
@@ -62,6 +65,7 @@
   --neutral-0: #1c1d27;
   --bg-pagina: #14151c;
   --bg-painel: #14151c;
+  --vidro-brilho: rgb(255 255 255 / 0.08);
 }
 
 /* Gera as classes do Tailwind: bg-primary-500, text-neutral-900, bg-pagina... */
@@ -96,6 +100,12 @@
   --shadow-suave:
     0 1px 2px rgb(17 24 28 / 0.04), 0 12px 32px -8px rgb(17 24 28 / 0.06);
   --shadow-modal: 0 24px 64px -12px rgb(17 24 28 / 0.18);
+
+  /* menu de vidro fosco: um reflexo fino em cima (o "brilho") + sombra que
+     destaca o menu sobre fundo branco. Não é borda: é luz e sombra. */
+  --shadow-vidro:
+    inset 0 1px 0 var(--vidro-brilho), 0 1px 2px rgb(17 24 28 / 0.06),
+    0 12px 32px -10px rgb(17 24 28 / 0.18);
 }
 
 /*

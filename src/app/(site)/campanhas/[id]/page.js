@@ -11,6 +11,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Button from "@/(components)/ui/Button";
 import Chip from "@/(components)/ui/Chip";
+import BarraDeProgresso from "@/(components)/ui/BarraDeProgresso";
 import QueroDoar from "@/(components)/base/(public)/QueroDoar";
 import GaleriaCampanha from "@/(components)/base/(public)/GaleriaCampanha";
 import {
@@ -196,12 +197,7 @@ export default async function DetalheCampanha({ params }) {
               </div>
               {porcentagem !== null && (
                 <div className="flex flex-col gap-2">
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-100">
-                    <div
-                      className="h-full rounded-full bg-primary-500"
-                      style={{ width: `${porcentagem}%` }}
-                    />
-                  </div>
+                  <BarraDeProgresso porcentagem={porcentagem} />
                   <p className="text-sm font-semibold text-primary-600">
                     {porcentagem}% da meta
                   </p>

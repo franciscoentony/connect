@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart, faShareFromSquare } from "@fortawesome/free-solid-svg-icons";
 import Chip from "@/(components)/ui/Chip";
 import Button from "@/(components)/ui/Button";
+import BarraDeProgresso from "@/(components)/ui/BarraDeProgresso";
 
 // Card da lista de campanhas (Início e página da ONG).
 // Os campos batem com o que a API devolve em GET /api/v1/campanhas.
@@ -86,14 +87,7 @@ export default function CampaignCard({
       </div>
 
       <div className="flex flex-col gap-2 px-2">
-        {porcentagem !== null && (
-          <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-100">
-            <div
-              className="h-full rounded-full bg-primary-500"
-              style={{ width: `${porcentagem}%` }}
-            />
-          </div>
-        )}
+        {porcentagem !== null && <BarraDeProgresso porcentagem={porcentagem} />}
         <span className="text-start text-sm font-semibold text-primary-600">
           {reais(arrecadado)} arrecadados{meta ? ` de ${reais(meta)}` : ""}
         </span>

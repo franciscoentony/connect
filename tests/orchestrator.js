@@ -201,7 +201,12 @@ export async function terminarPrazoNoBanco(idCampanha) {
   await client.connect();
   try {
     await client.query(
-      "UPDATE campanha SET termina_em = CURRENT_DATE - 1 WHERE id_campanha = $1",
+      // "ontem" no horário de Brasília, como o sistema (hojeNoBrasil).
+      // CURRENT_DATE usa o relógio do banco (UTC): entre 21h e meia-noite de
+      // Brasília ele já está no dia seguinte, e "ontem" viraria "hoje".
+      `UPDATE campanha
+       SET termina_em = (now() AT TIME ZONE 'America/Sao_Paulo')::date - 1
+       WHERE id_campanha = $1`,
       [idCampanha],
     );
   } finally {

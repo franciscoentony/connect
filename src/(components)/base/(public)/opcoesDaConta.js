@@ -49,9 +49,11 @@ export function opcoesDaConta(tipo) {
 }
 
 // Encerra a sessão (apaga o cookie) e volta para o início.
-// Uso: <button onClick={() => sairDaConta(router)}>Sair da conta</button>
-export async function sairDaConta(router) {
+// Recarrega a página inteira (em vez de só navegar): o Next guarda na memória
+// páginas já visitadas com a conta logada, e a recarga garante que nada da
+// conta antiga continue aparecendo.
+// Uso: <button onClick={sairDaConta}>Sair da conta</button>
+export async function sairDaConta() {
   await fetch("/api/v1/sessao", { method: "DELETE" });
-  router.push("/");
-  router.refresh();
+  window.location.assign("/");
 }
