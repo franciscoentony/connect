@@ -43,7 +43,8 @@ export default function Header({ usuario }) {
     <header className="fixed z-99 w-full duration-300 ease lg:px-4 lg:pt-8">
       <MenuMobile links={links} usuario={usuario} />
 
-      <nav className="mx-auto hidden max-w-7xl grid-cols-3 lg:grid items-center rounded-full bg-neutral-100 duration-300 ease py-2 pl-9 pr-4 shadow-suave">
+      {/* vidro fosco: fundo translúcido que desfoca o que passa por trás */}
+      <nav className="mx-auto hidden max-w-7xl grid-cols-3 lg:grid items-center rounded-full bg-neutral-0/70 shadow-vidro backdrop-blur-xl backdrop-saturate-150 duration-300 ease py-2 pl-9 pr-4">
         <Link href="/" className="justify-self-start">
           <Logo />
         </Link>

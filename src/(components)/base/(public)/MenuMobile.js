@@ -45,7 +45,8 @@ export default function MenuMobile({ links, usuario }) {
 
   return (
     <div className="lg:hidden">
-      <div className="flex h-16 items-center justify-between bg-neutral-0 px-4 shadow-suave">
+      {/* mesmo vidro fosco do menu do computador */}
+      <div className="flex h-16 items-center justify-between bg-neutral-0/70 shadow-vidro backdrop-blur-xl backdrop-saturate-150 px-4">
         <Link href="/" aria-label="Início">
           <Logo largura={120} />
         </Link>
